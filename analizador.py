@@ -7,36 +7,29 @@ parametros =["type","encrypt_log","encrypt_read","llave","name","body","path","f
 
 class analizador:
     def __init__(self):
-        self.fila = 1
-        self.columna = 0
         self.lexema = ''
         self.estado = 0
         self.instrucciones = []
-        self.comando = []
+        self.parametros = []
+        self.comando = ""
         self.i = 0
 
     def x0(self, char):
         if char in L:
             self.lexema += char
-            self.columna += 1
             self.estado = 1
-        elif char in D:
-            self.lexema += char
-            self.columna += 1
-            self.estado = 2
-        elif char in s:
-            self.lexema += char
-            self.columna += 1
-            self.estado = 3
         elif char == '\n':
             self.comando = []
-            self.columna = 0
-            self.fila += 1
             self.estado= 0
+        elif char == '-':
+            self.comando = []
+            self.estado= 2
+        elif char == '>':
+            self.comando = []
+            self.estado= 3
         else:
-            self.errores.append(errores( self.lexema, self.columna, self.fila))
+            self.errores.append(errores( self.lexema, "Hay un error de escritura"))
             self.lexema = ''
-            self.columna += 1
             self.estado = 0
 
     def x1(self, char):
@@ -44,309 +37,70 @@ class analizador:
             self.lexema += char
             self.columna += 1
             self.estado = 1
-        elif char =='<':
-            self.tokens.append(tokens('string', self.lexema, self.fila, self.columna))
+        elif char ==' ':
+            if (self.lexema.lower()) in comandos:
+                self.comando = self.lexema.lower()
             self.lexema = ''
-            self.i -= 1
-            self.columna += 1
             self.estado = 0
-        elif char in D:
-            self.lexema += char
-            self.columna += 1
-            self.estado = 4
-        elif char in s:
-            self.lexema += char
-            self.columna += 1
-            self.estado = 4
-        elif char == ' ':
-            self.lexema += char
-            self.columna += 1
-            self.estado = 1
-        elif char == '\t':
-            self.lexema += ' '
-            self.columna += 4
-            self.estado = 1
-        elif char == '\n':
-            self.lexema += ' '
-            self.columna = 0
-            self.fila += 1
-            self.estado = 1
         else:
-            self.errores.append(errores(self.lexema, self.columna, self.fila))
-            self.columna += 1
+            self.comando = "errorcomando"
+            self.errores.append(errores(self.lexema, "Este comando no existe"))
             self.lexema = ''
             self.estado = 0
 
     def x2(self, char):
-            if char in L:
-                self.lexema += char
-                self.columna += 1
-                self.estado = 4
-            elif char in D:
-                self.lexema += char
-                self.columna += 1
-                self.estado = 2
-            elif char in s:
-                self.lexema += char
-                self.columna += 1
-                self.estado = 4
-            elif char == '<':
-                self.tokens.append(tokens('Numero', self.lexema, self.fila, self.columna))
-                self.lexema = ''
-                self.i -= 1
-                self.columna += 1
-                self.estado = 0
-            elif char == '.':
-                self.lexema += char
-                self.columna += 1
-                self.estado = 5
-            elif char == ' ':
-                self.columna += 1
-                self.estado = 2
-            elif char == '\t':
-                self.columna += 4
-                self.estado = 2
-            elif char == '\n':
-                self.columna = 0
-                self.fila += 1
-                self.estado = 2
-            else:
-                self.errores.append(errores(self.lexema, self.columna, self.fila))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-
-    def x3(self, char):
         if char in L:
             self.lexema += char
             self.columna += 1
-            self.estado = 4
+            self.estado = 2
+        elif char == '-':
+            if (self.lexema.lower()) in parametros:
+                self.parametros.append(self.lexema.lower())
+            self.lexema = ''
+            self.estado = 0
+        else:
+            self.parametros.append("errorparametro")
+            self.errores.append(errores(self.lexema, "Este parámetro no existe"))
+            self.lexema = ''
+            self.estado = 0
+
+    def x3(self,char):
+        if char in L:
+            self.lexema += char
+            self.estado = 3
         elif char in D:
             self.lexema += char
-            self.columna += 1
-            self.estado = 4
-        elif char in s:
-            self.lexema += char
-            self.columna += 1
             self.estado = 3
-        elif char == '<':
-            self.tokens.append(tokens('signo', self.lexema, self.fila, self.columna))
-            self.lexema = ''
-            self.columna += 1
-            self.estado = 0
-        elif char == '.':
+        elif char == "/":
             self.lexema += char
-            self.columna += 1
+            self.estado = 3
+        elif char == '\"':
             self.estado = 4
         elif char == ' ':
-            self.lexema += char
-            self.columna += 1
-            self.estado = 3
-        elif char == '\t':
-            self.lexema += ' '
-            self.columna += 4
-            self.estado = 3
-        elif char == '\n':
-            self.lexema += ' '
-            self.columna = 0
-            self.fila += 1
-            self.estado = 3
-        else:
-            self.errores.append(errores(self.lexema, self.columna, self.fila))
+            self.parametros.append(self.lexema.lower())
             self.lexema = ''
-            self.columna += 1
+            self.estado = 0
+        else:
+            self.parametros.append("errorparametro")
+            self.errores.append(errores(self.lexema, "Hay un error en el valor del parámetro"))
+            self.lexema = ''
             self.estado = 0
 
     def x4(self,char):
         if char in L:
             self.lexema += char
-            self.columna += 1
             self.estado = 4
         elif char in D:
             self.lexema += char
-            self.columna += 1
             self.estado = 4
-        elif char in s:
-            self.lexema += char
-            self.columna += 1
-            self.estado = 4
-        elif char == '<':
-            self.tokens.append(tokens('Valor', self.lexema, self.fila, self.columna))
-            self.lexema = ''
-            self.i -= 1
-            self.columna += 1
-            self.estado = 0
-        elif char == '.':
-            self.lexema += char
-            self.columna += 1
-            self.estado = 4
+        elif char == '\"':
+            self.estado = 3
         elif char == ' ':
-            self.lexema += char
-            self.columna += 1
-            self.estado = 4
-        elif char == '\t':
-            self.lexema += ' '
-            self.columna += 4
-            self.estado = 4
-        elif char == '\n':
-            self.lexema += ' '
-            self.columna = 0
-            self.fila += 1
             self.estado = 4
         else:
-            self.errores.append(errores( self.lexema, self.columna, self.fila))
+            self.parametros.append("errorparametro")
+            self.errores.append(errores(self.lexema, "Hay un error en el valor del parámetro"))
             self.lexema = ''
-            self.columna += 1
-            self.estado = 0
-
-    def x5(self, char):
-        if char in D:
-            self.lexema += char
-            self.columna += 1
-            self.estado = 6
-        elif char == ' ':
-            self.columna += 1
-            self.estado = 5
-        elif char == '\t':
-            self.columna += 4
-            self.estado = 5
-        elif char == '\n':
-            self.columna = 0
-            self.fila += 1
-            self.estado = 5
-        else:
-            self.errores.append(errores(self.lexema, self.columna, self.fila))
-            self.lexema = ''
-            self.columna += 1
-            self.estado = 0
-
-    def x6(self,char):
-        if char in D:
-            self.lexema += char
-            self.columna += 1
-            self.estado = 6
-        elif char == '<':
-            self.tokens.append(tokens('Numero', self.lexema, self.fila, self.columna))
-            self.lexema = ''
-            self.columna += 1
-            self.estado = 0
-        elif char == ' ':
-            self.columna += 1
-            self.estado = 6
-        elif char == '\t':
-            self.columna += 1
-            self.estado = 6
-        elif char == '\n':
-            self.columna = 0
-            self.fila += 1
-            self.estado = 6
-        else:
-            self.errores.append(errores( self.lexema, self.columna, self.fila))
-            self.columna += 1
-            self.lexema = ''
-            self.estado = 0
-
-    def x7(self, char):
-        if char in L:
-            self.lexema += char
-            self.columna += 1
-            self.estado = 7
-        elif char == '=':
-            if self.lexema == 'Operacion':
-                self.tokens.append(tokens('inicio', self.lexema, self.fila, self.columna))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 7
-            elif self.lexema in PR:
-                self.tokens.append(tokens('PR', self.lexema, self.fila, self.columna))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 1
-            else:
-                self.errores.append(errores(self.lexema, self.columna, self.fila))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-        elif char == '>':
-            if self.lexema in Op:
-                self.tokens.append(tokens('OP', self.lexema, self.fila, self.columna))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-            elif self.lexema == 'Numero':
-                self.tokens.append(tokens('PNum1', self.lexema, self.fila, self.columna))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-            elif self.lexema in PR:
-                self.tokens.append(tokens('PRI', self.lexema, self.fila, self.columna))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-            else:
-                self.errores.append(errores(self.lexema, self.columna, self.fila))
-                self.errores.append(errores(char, self.columna, self.fila))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-        elif char == '/':
-            self.columna += 1
-            self.estado = 8
-        elif char == ' ':
-            self.columna += 1
-            self.estado = 7
-        elif char == '\t':
-            self.columna += 1
-            self.estado = 7
-        elif char == '\n':
-            self.columna = 0
-            self.fila += 1
-            self.estado = 7
-        else:
-            self.errores.append(errores(self.lexema, self.columna, self.fila))
-            self.lexema = ''
-            self.estado = 0
-
-    def x8(self,char):
-        if char in L:
-            self.lexema += char
-            self.columna += 1
-            self.estado = 8
-        elif char == '>':
-            if self.lexema == 'Operacion':
-                self.tokens.append(tokens('final', self.lexema, self.fila, self.columna))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-            elif self.lexema == 'Numero':
-                self.tokens.append(tokens('PNum2', self.lexema, self.fila, self.columna))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-            elif self.lexema in PR:
-                self.tokens.append(tokens('PRF', self.lexema, self.fila, self.columna))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-            else:
-                self.errores.append(errores(self.lexema, self.columna, self.fila))
-                self.lexema = ''
-                self.columna += 1
-                self.estado = 0
-        elif char == ' ':
-            self.columna += 1
-            self.estado = 8
-        elif char == '\t':
-            self.columna += 1
-            self.estado = 8
-        elif char == '\n':
-            self.columna = 0
-            self.fila += 1
-            self.estado = 8
-        else:
-            self.errores.append(errores( self.lexema, self.columna, self.fila))
-            self.lexema = ''
-            self.columna += 1
             self.estado = 0
 
     def analizar(self,texto):
@@ -363,12 +117,4 @@ class analizador:
                 self.x3(texto[self.i])
             elif self.estado == 4:
                 self.x4(texto[self.i])
-            elif self.estado == 5:
-                self.x5(texto[self.i])
-            elif self.estado == 6:
-                self.x6(texto[self.i])
-            elif self.estado == 7:
-                self.x7(texto[self.i])
-            elif self.estado == 8:
-                self.x8(texto[self.i])
             self.i += 1
