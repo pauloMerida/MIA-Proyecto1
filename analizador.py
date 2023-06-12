@@ -29,13 +29,12 @@ class analizador:
             self.estado = 1
         elif char == '\n':
             diccionario = {}
-            index = 1
             diccionario["comando"] = self.comando
 
             for i in range(0, len(self.parametros), 2):
-                valor = self.parametros[i] + ","+self.parametros[i + 1]
-                diccionario["parametro"+str(index)] = valor
-                index+=1
+                clave = self.parametros[i]
+                valor = self.parametros[i + 1]
+                diccionario[clave] = valor
             self.instrucciones.append(diccionario)
 
             diccionario = {}
