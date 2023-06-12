@@ -1,3 +1,5 @@
+from InstruccionesComandos import *
+
 L = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
          'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
          'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'Ñ', 'ñ','á','é','í','ó','ú', 'Á','É','Í','Ó','Ú']
@@ -14,18 +16,35 @@ class analizador:
         self.comando = ""
         self.i = 0
 
+    def enviarInstrucciones(self):
+        EjecutarComandos(self.instrucciones)
+
+    def hacertablaerrores(self):
+        reporteerrores(self.errores)
+        #hay que enviarle la tabla self.errores por medio de self.hacertablaerrores(self.errores)
+
     def x0(self, char):
         if char in L:
             self.lexema += char
             self.estado = 1
         elif char == '\n':
-            self.comando = []
+            diccionario = {}
+            index = 1
+            diccionario["comando"] = self.comando
+
+            for i in range(0, len(self.parametros), 2):
+                valor = self.parametros[i] + ","+self.parametros[i + 1]
+                diccionario["parametro"+str(index)] = valor
+                index+=1
+            self.instrucciones.append(diccionario)
+
+            diccionario = {}
+            self.comando = ""
+            self.parametros = []
             self.estado= 0
         elif char == '-':
-            self.comando = []
             self.estado= 2
         elif char == '>':
-            self.comando = []
             self.estado= 3
         else:
             self.errores.append(errores( self.lexema, "Hay un error de escritura"))
