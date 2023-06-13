@@ -77,8 +77,36 @@ def local(tabla,modo):
                 print("La ruta no se refiere a un archivo.")
 
         elif comando == "rename":
+                directorio_padre = os.path.dirname(i.get("path"))
+                if os.path.exists(ruta + i.get("path")):
+                    if os.path.exists(ruta + directorio_padre + i.get("name")):
+                        # hay que poner el error en la bitacora
+                        print("La ruta no se refiere a un archivo.")
+                    else:
+                        os.rename(ruta + i.get("path"), i.get("name"))
+                else:
+                    # hay que poner el error en la bitacora
+                    print("La ruta no se refiere a un archivo.")
+
         elif comando == "modify":
+            if os.path.exists(ruta + i.get("path")):
+                f = open(ruta + i.get("path"), "w")
+                f.write(i.get("body"))
+                f.close()
+            else:
+                # hay que poner el error en la bitacora
+                print("La ruta no se refiere a un archivo.")
+
         elif comando == "add":
+            if os.path.exists(ruta + i.get("path")):
+                f = open(ruta + i.get("path"), "a")
+                f.write(i.get("body"))
+                f.close()
+            else:
+                # hay que poner el error en la bitacora
+                print("La ruta no se refiere a un archivo.")
+
         elif comando == "backup":
+            print("hola")
 
 
