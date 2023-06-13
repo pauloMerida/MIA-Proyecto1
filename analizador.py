@@ -92,11 +92,18 @@ class analizador:
         elif char == "/":
             self.lexema += char
             self.estado = 3
-        elif char == '\"':
+        elif char == '\"' and self.parametros[-1] == "path":
             self.estado = 4
+        elif char == '\"' and self.parametros[-1] == "body":
+            self.estado = 5
         elif char == ' ':
-            self.parametros.append(self.lexema.lower())
+            self.parametros.append(self.lexema)
             self.lexema = ''
+            self.estado = 0
+        elif char == '\n':
+            self.parametros.append(self.lexema)
+            self.lexema = ''
+            self.i -= 1
             self.estado = 0
         else:
             self.parametros.append("errorparametro")
@@ -121,6 +128,29 @@ class analizador:
             self.lexema = ''
             self.estado = 0
 
+    def x5(self,char):
+        if char in L:
+            self.lexema += char
+            self.estado = 5
+        elif char in D:
+            self.lexema += char
+            self.estado = 5
+        elif char == '\n':
+            self.lexema += char
+            self.estado = 5
+        elif char == '\"':
+            self.parametros.append(self.lexema)
+            self.lexema = ''
+            self.estado = 0
+        elif char == ' ':
+            self.lexema += char
+            self.estado = 5
+        else:
+            self.parametros.append("errorparametro")
+            self.errores.append(errores(self.lexema, "Hay un error en el valor del parámetro"))
+            self.lexema = ''
+            self.estado = 0
+
     def analizar(self,texto):
         #hay que enviar el archivo en analizar(archivo)
         self.i = 0
@@ -135,4 +165,6 @@ class analizador:
                 self.x3(texto[self.i])
             elif self.estado == 4:
                 self.x4(texto[self.i])
+            elif self.estado == 5:
+                self.x5(texto[self.i])
             self.i += 1
