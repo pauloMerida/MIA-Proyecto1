@@ -1,4 +1,5 @@
 from InstruccionesComandos import *
+from bitacora import *
 
 L = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
          'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
@@ -15,13 +16,6 @@ class analizador:
         self.parametros = []
         self.comando = ""
         self.i = 0
-
-    def enviarInstrucciones(self):
-        EjecutarComandos(self.instrucciones)
-
-    def hacertablaerrores(self):
-        reporteerrores(self.errores)
-        #hay que enviarle la tabla self.errores por medio de self.hacertablaerrores(self.errores)
 
     def x0(self, char):
         if char in L:
@@ -46,7 +40,8 @@ class analizador:
         elif char == '>':
             self.estado= 3
         else:
-            self.errores.append(errores( self.lexema, "Hay un error de escritura"))
+            HF = HorayFecha()
+            self.errores.append(bitacora(HF[1],HF[0],"ERROR","Error de escritura en el lexema: "+self.lexema))
             self.lexema = ''
             self.estado = 0
 
@@ -62,7 +57,8 @@ class analizador:
             self.estado = 0
         else:
             self.comando = "errorcomando"
-            self.errores.append(errores(self.lexema, "Este comando no existe"))
+            HF = HorayFecha()
+            self.errores.append(bitacora(HF[1], HF[0], "ERROR", "El comando: " + self.lexema+" no existe."))
             self.lexema = ''
             self.estado = 0
 
@@ -78,7 +74,8 @@ class analizador:
             self.estado = 0
         else:
             self.parametros.append("errorparametro")
-            self.errores.append(errores(self.lexema, "Este parámetro no existe"))
+            HF = HorayFecha()
+            self.errores.append(bitacora(HF[1], HF[0], "ERROR", "El parámetro " + self.lexema+" no existe."))
             self.lexema = ''
             self.estado = 0
 
@@ -107,7 +104,8 @@ class analizador:
             self.estado = 0
         else:
             self.parametros.append("errorparametro")
-            self.errores.append(errores(self.lexema, "Hay un error en el valor del parámetro"))
+            HF = HorayFecha()
+            self.errores.append(bitacora(HF[1], HF[0], "ERROR", "Error de escritura en: " + self.lexema))
             self.lexema = ''
             self.estado = 0
 
@@ -124,7 +122,8 @@ class analizador:
             self.estado = 4
         else:
             self.parametros.append("errorparametro")
-            self.errores.append(errores(self.lexema, "Hay un error en el valor del parámetro"))
+            HF = HorayFecha()
+            self.errores.append(bitacora(HF[1], HF[0], "ERROR", "Error de escritura en: " + self.lexema))
             self.lexema = ''
             self.estado = 0
 
@@ -146,8 +145,8 @@ class analizador:
             self.lexema += char
             self.estado = 5
         else:
-            self.parametros.append("errorparametro")
-            self.errores.append(errores(self.lexema, "Hay un error en el valor del parámetro"))
+            HF = HorayFecha()
+            self.errores.append(bitacora(HF[1], HF[0], "ERROR", "Error de escritura en: " + self.lexema))
             self.lexema = ''
             self.estado = 0
 
@@ -168,3 +167,8 @@ class analizador:
             elif self.estado == 5:
                 self.x5(texto[self.i])
             self.i += 1
+
+        CrearArreglo(self.errores)
+        EjecutarComandos(self.instrucciones)
+
+
