@@ -6,7 +6,6 @@ from cryptography.hazmat.backends import default_backend
 import binascii
 import re
 
-
 #contra
 #gatoperro
 ventana = tk.Tk()
@@ -52,7 +51,6 @@ def desencriptar_contraseña(ciphertext_hex, clave):
     var2= re.sub(r'\W+', '', var1)
   
     return var2
-
 
 def convertir_a_hexadecimal(clave):
     # Convertir la clave de texto a bytes
@@ -124,13 +122,13 @@ def logear():
     key="6d696170726f796563746f3132333435"
     usuario=entrada.get().strip()
     passw=entrada2.get().strip()
-    
+    print(passw)
     encontrado=False
     for i in range(len(usuarios)):
         pass_temporal= str(contras[i]).strip()
         user_temporal=str(usuarios[i]).strip()        
         passtemp = desencriptar_contraseña(pass_temporal,key)
-
+        print(passtemp)
         if passtemp==passw and user_temporal== usuario:
             print("credenciales correctas")
             ventana.withdraw()
