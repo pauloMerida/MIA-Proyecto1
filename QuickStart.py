@@ -1,4 +1,19 @@
-from pydrive.auth import GoogleAuth
+from pydrive2.auth import GoogleAuth
+from pydrive2.drive import GoogleDrive
 
-gauth = GoogleAuth()
-gauth.LocalWebserverAuth() # Creates local webserver and auto handles authentication.
+directorio_credenciales ='credentials_module.json'
+
+def Login():
+    GoogleAuth.DEFAULT_SETTINGS['client_config_file']=directorio_credenciales
+    gauth = GoogleAuth()
+    gauth.LoadCredentialsFile(directorio_credenciales)
+
+    if gauth.credentials is None:
+        gauth.LocalWebserverAuth()
+    elif gauth.access_token_expired:
+        gauth.Refresh()
+    else:
+        gauth.Authorize()
+    gauth.SaveCredentialsFile(directorio_credenciales)
+    credenciales = GoogleDrive(gauth)
+    return credenciales

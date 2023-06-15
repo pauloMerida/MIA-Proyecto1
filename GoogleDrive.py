@@ -1,22 +1,21 @@
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from pydrive2.files import FileNotUploadedError
+import os
 
-directorio_credenciales = 'credentials_module.json'
+directorio_credenciales ='credentials_module.json'
 
-# INICIAR SESION
 def login():
-    GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = directorio_credenciales
+    GoogleAuth.DEFAULT_SETTINGS['client_config_file']=directorio_credenciales
     gauth = GoogleAuth()
     gauth.LoadCredentialsFile(directorio_credenciales)
-    
+
     if gauth.credentials is None:
-        gauth.LocalWebserverAuth(port_numbers=[8092])
+        gauth.LocalWebserverAuth()
     elif gauth.access_token_expired:
         gauth.Refresh()
     else:
         gauth.Authorize()
-        
     gauth.SaveCredentialsFile(directorio_credenciales)
     credenciales = GoogleDrive(gauth)
     return credenciales
@@ -123,16 +122,48 @@ def mover_archivo(id_archivo,id_folder):
                            'parentLink': 'https://www.googleapis.com/drive/v2/files/' + id_folder}]
     archivo.Upload(param={'supportsTeamDrives': True})
 
+raiz=False
+def subir_back(folder_path, parent_id='1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo'):
+    try:
+
+        credenciales = login()
+        folder_name = os.path.basename(folder_path)
+        folder_metadata = {'title': folder_name, 'mimeType': 'application/vnd.google-apps.folder'}
+        if folder_name!="Archivos":
+            if parent_id:
+                folder_metadata['parents'] = [{'id': parent_id}]
+            folder = credenciales.CreateFile(folder_metadata)
+            folder.Upload()            
+
+        for file_name in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, file_name)
+            if os.path.isfile(file_path):               
+
+                if folder_name!="Archivos":
+                    file_metadata = {'title': file_name, 'parents': [{'id': folder['id'] }]}
+                else:
+                    file_metadata = {'title': file_name, 'parents': [{'id': '1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo' }]}
+                file = credenciales.CreateFile(file_metadata)
+                file.SetContentFile(file_path)
+                file.Upload()
+                
+            elif os.path.isdir(file_path):
+                if folder_name!="Archivos":
+                    subir_back(file_path, parent_id=folder['id'])
+                else:
+                    subir_back(file_path, parent_id='1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo')
+    except:
+        print("paso algo")
 
 if __name__ == "__main__":
     ruta_archivo = '/home/falv/Escritorio/fondo.jpg'
     id_folder = '1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo'
     id_drive = '1JWQD7oEImq9xwMoqKCxbSDy90o-3iplF'
-    ruta_descarga = 'C:/Users/Paulo/Downloads/'
+    ruta_descarga = 'C:/Users/Paulo/Downloads/T1_202002042.pdf'
     #C:\Users\Paulo\Desktop
     #C:\Users\Paulo\Downloads
-    crear_archivo_texto('test.txt','Esta es una prueba del drive',id_folder)
-    #subir_archivo(ruta_archivo,id_folder)
+    #crear_archivo_texto('nuevo.txt','dia 15 a ver si sirve',id_folder)
+    #subir_archivo(ruta_descarga,id_folder)
     #bajar_archivo_por_id(id_drive,ruta_descarga)
     #busca("title = 'mooncode.png'")
     #bajar_acrchivo_por_nombre('WhatsApp Image 2020-11-01 at 9.55.34 PM (1).jpeg',ruta_descarga)

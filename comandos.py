@@ -4,6 +4,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter import messagebox
 import shutil
+import GoogleDrive as gd
 import os,re
 #variables globales de los comandos
 # comando configure 
@@ -36,7 +37,8 @@ add_path=""
 add_body=""
 #comando exec
 exec_path=""
-
+#ID carpeta archivos Drive
+id_folder = '1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo'
 #ventana principal TKinter
 ventana = tk.Tk()
 ventana.title("Consola")
@@ -466,9 +468,59 @@ def emergente_transfer():
     entrada3.place(x=200,y=130)
 
 def emergente_rename():
+    global rename_path,rename_name
     # Crear la ventana emergente
     ventana_emergente = tk.Toplevel(ventana)
-    
+
+    def enviar():
+        global rename_path,rename_name
+        rename_path="Archivos"+entrada.get()
+        rename_name=entrada3.get()
+        if os.path.exists(rename_path):
+            es_archivo=False
+            repetido=False
+            resultados = re.findall(r'\b\w+\.txt\b', rename_path)  
+            for resultado in resultados:            
+                es_archivo=True
+
+
+            if es_archivo==False:
+                dividido=rename_path.split('/')
+                parametro=dividido[len(dividido)-1]
+                nueva=rename_path.replace(parametro,"")    
+                contenido = os.listdir(nueva)                  
+                for elemento in contenido:
+                    if elemento==rename_name:
+                        repetido=True
+            else:
+                dividido=rename_path.split("/")
+                parametro=dividido[len(dividido)-1]
+                ruta=rename_path.replace(parametro,"")
+                contenido = os.listdir(ruta)                  
+                for elemento in contenido:
+                    if elemento==rename_name:
+                        repetido=True
+
+            if es_archivo==False:
+                if repetido==False:
+                    ruta_carpeta_actual = os.path.abspath(rename_path)                    
+                    ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual),rename_name)
+                    print("ruta_nueva_carpeta="+ruta_nueva_carpeta)
+                    #print("ruta actual"+ruta_carpeta_actual+"**"+"ruta nueva carpeta"+ruta_nueva_carpeta)
+                    os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)
+                    messagebox.showinfo("Rename", "carpeta renombrada correctamente")
+                else:
+                    messagebox.showinfo("Rename", "Error el nombre de la carpeta ya existe")
+            elif es_archivo==True:
+                if repetido==False:
+                    ruta_carpeta_actual = os.path.abspath(rename_path)                    
+                    ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual),rename_name)
+                    os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)
+                    messagebox.showinfo("Rename", "archivo renombrado correctamente")
+                else:
+                    messagebox.showinfo("Rename", "Error el nombre del archivo ya existe")
+        else:
+            messagebox.showinfo("Rename", "Ruta incorrecta")
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("Rename")
     ventana_emergente.geometry("500x400")
@@ -481,7 +533,7 @@ def emergente_rename():
     label2.place(x=30,y=130)
    
     #boton
-    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2", font=("Arial",14,"bold"),background="#5DADE2")
+    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
     boton_config.place(x=250,y=340)    
 
     #cuadro de entrada
@@ -496,6 +548,19 @@ def emergente_rename():
     entrada3.place(x=200,y=130)
 
 def emergente_modify():
+    global modify_path,modify_body
+
+    def enviar():
+        global modify_path,modify_body
+        modify_path="Archivos"+entrada.get()
+        modify_body=entrada3.get()
+        if os.path.exists(modify_path):
+            with open(modify_path, "w") as archivo:
+                archivo.write(modify_body)
+            messagebox.showinfo("Modify", "Cuerpo cambiado correctamente")
+        else:
+            messagebox.showinfo("Modify", "Error la ruta no existe")
+
     # Crear la ventana emergente
     ventana_emergente = tk.Toplevel(ventana)
     
@@ -511,7 +576,7 @@ def emergente_modify():
     label2.place(x=30,y=130)
    
     #boton
-    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2", font=("Arial",14,"bold"),background="#5DADE2")
+    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
     boton_config.place(x=250,y=340)    
 
     #cuadro de entrada
@@ -528,7 +593,17 @@ def emergente_modify():
 def emergente_add():
     # Crear la ventana emergente
     ventana_emergente = tk.Toplevel(ventana)
-    
+    def enviar():
+        global add_path,add_body
+        add_path="Archivos"+entrada.get()
+        add_body=entrada3.get()
+        if os.path.exists(add_path):
+            with open(add_path, "a") as archivo:
+                add_body="\n"+add_body
+                archivo.write(add_body)
+            messagebox.showinfo("Add", "Cuerpo agregado correctamente")
+        else:
+            messagebox.showinfo("Add", "Error la ruta no existe")
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("Add")
     ventana_emergente.geometry("500x400")
@@ -541,7 +616,7 @@ def emergente_add():
     label2.place(x=30,y=130)
    
     #boton
-    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2", font=("Arial",14,"bold"),background="#5DADE2")
+    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
     boton_config.place(x=250,y=340)    
 
     #cuadro de entrada
@@ -579,6 +654,19 @@ def emergente_exec():
     entrada= tk.Entry(ventana_emergente,textvar=path,width=20, relief="flat",font=("Arial",14,"bold"))
     entrada.place(x=200,y=50)
 
+def backup():
+    global id_folder
+    if configure_type=="local":
+        #hacer backup a la nube
+        try:
+            ruta_descarga = 'C:/Users/Paulo/Documents/Vacas Junio 2023/Lab archivos/Proyectos/Proyecto1/Archivos'
+            gd.subir_back(ruta_descarga,id_folder)
+            messagebox.showinfo("Drive", "correcto")
+        except:
+            messagebox.showinfo("Drive", "error")
+    else:
+        pass
+
 #botones
 boton_config = tk.Button(ventana,text="Configure",cursor="hand2",command=emergente_configure, font=("Arial",14,"bold"),background="#5DADE2")
 boton_config.place(x=800,y=90)
@@ -604,7 +692,7 @@ boton_copy.place(x=800,y=270)
 boton_add = tk.Button(ventana,text="Add",cursor="hand2",command=emergente_add, font=("Arial",14,"bold"),background="#5DADE2")
 boton_add.place(x=1000,y=270)
 
-boton_back = tk.Button(ventana,text="Backup",cursor="hand2", font=("Arial",14,"bold"),background="#5DADE2")
+boton_back = tk.Button(ventana,text="Backup",cursor="hand2",command=backup, font=("Arial",14,"bold"),background="#5DADE2")
 boton_back.place(x=800,y=320)
 
 boton_exec = tk.Button(ventana,text="Exec",cursor="hand2",command=emergente_exec, font=("Arial",14,"bold"),background="#5DADE2")
