@@ -59,6 +59,7 @@ def busca(query):
     for f in lista_archivos:
         # ID Drive
         print('ID Drive:',f['id'])
+        id_archivo='ID Drive:',f['id']
         # Link de visualizacion embebido
         print('Link de visualizacion embebido:',f['embedLink'])
         # Link de descarga
@@ -79,7 +80,28 @@ def busca(query):
         print('Tamanio:',f['fileSize'])
         resultado.append(f)
     
-    return resultado
+    return id_archivo
+
+#BUSCAR ARCHIVOS DE UNA CARPETA EN ESPECIFICO
+def buscar_archivos_en_carpeta(id_folder,file_name):
+    credenciales = login()
+    file_list = credenciales.ListFile({'q': "'{}' in parents and trashed=false".format(id_folder)}).GetList()
+
+    for file in file_list:
+        if file['title']==file_name:            
+            id_file=file['id']
+    
+    return id_file
+        
+#ELIMINAR ARCHIVO MEDIANTE EL ID
+def eliminar_archvivo_por_id(file_id):
+    credenciales = login()
+    credenciales.CreateFile({'id': file_id}).Delete()
+
+#ELIMINAR CARPETA MEDIANTE EL ID
+def eliminar_carpeta_por_id(folder_id):
+    credenciales = login()
+    credenciales.CreateFile({'id': folder_id}).Delete()
 
 # DESCARGAR UN ARCHIVO DE DRIVE POR NOMBRE
 def bajar_acrchivo_por_nombre(nombre_archivo,ruta_descarga):
@@ -154,6 +176,26 @@ def subir_back(folder_path, parent_id='1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo'):
                     subir_back(file_path, parent_id='1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo')
     except:
         print("paso algo")
+
+def busca_carpeta(ruta_carpeta):
+    credenciales=login()
+
+    try:
+        segmentos = ruta_carpeta.split("/")
+        carpeta_padre = "root"
+        for segmento in segmentos:
+            if segmento != "":
+                query = f"'{carpeta_padre}' in parents and title = '{segmento}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+                archivo = credenciales.ListFile({'q': query}).GetList()[0]
+                carpeta_padre = archivo['id']
+
+        if carpeta_padre=="root":
+            return "no"
+        else:
+            return carpeta_padre
+    except:
+        return "error"
+    
 
 if __name__ == "__main__":
     ruta_archivo = '/home/falv/Escritorio/fondo.jpg'

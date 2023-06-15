@@ -8,7 +8,7 @@ import GoogleDrive as gd
 import os,re
 #variables globales de los comandos
 # comando configure 
-configure_type="local"
+configure_type="cloud"
 configure_log=False
 configure_read=False
 configure_key=""
@@ -67,6 +67,7 @@ def emergente_configure():
     def enviar():
         global configure_key
         configure_key=entrada.get()
+        messagebox.showinfo("Configure", "Sistema configurado")
         
         
     # Configurar propiedades de la ventana emergente
@@ -170,23 +171,77 @@ def emergente_create():
 
     entrada3= tk.Entry(ventana_emergente,textvar=path,width=20, relief="flat",font=("Arial",14,"bold"))
     entrada3.place(x=200,y=210)
+    #funcion respaldo
+    def carpetas_drive():
+        pass
 
-     #funcion enviar
+    #funcion enviar
     def enviar():
+        global configure_type
         global create_name,create_body,create_path
-        create_name=entrada.get()
-        create_body=entrada2.get()
-        create_path=entrada3.get()
-
-        ruta_total="Archivos"+create_path
-        if not os.path.exists(ruta_total):
-            # Crear la carpeta si no existe
-            os.makedirs(ruta_total)
+        if configure_type=="local":
             
-        archivo = open(ruta_total+create_name,'w')
-        archivo.write(create_body)
-        archivo.close
-        messagebox.showinfo("Create", "Archivo creado exitosamente")
+            create_name=entrada.get()
+            create_body=entrada2.get()
+            create_path=entrada3.get()
+
+            ruta_total="Archivos"+create_path
+            if not os.path.exists(ruta_total):
+                # Crear la carpeta si no existe
+                os.makedirs(ruta_total)
+                
+            archivo = open(ruta_total+create_name,'w')
+            archivo.write(create_body)
+            archivo.close
+            messagebox.showinfo("Create", "Archivo creado exitosamente")
+        elif configure_type=="cloud":
+            
+            create_name=entrada.get()
+            create_body=entrada2.get()
+            create_path="Archivos"+entrada3.get()
+            dividido=create_path.split("/")
+            ruta_existe=False
+            existe=gd.busca_carpeta(create_path)
+            ruta_alternativa="Archivos/"
+            if existe=="no":
+                print("la ruta no existe2")
+            elif existe=="error":
+                id_actual=""
+                for i in range(len(dividido)-1):
+                    if i==0:
+                        existe=gd.busca_carpeta("Archivos")
+                    else:
+                        existe=gd.busca_carpeta(ruta_alternativa+dividido[i]+'/')
+                    if existe=="error":
+                        gd.crear_carpeta(dividido[i],id_actual)
+                        ruta_alternativa+=dividido[i]+'/'
+                        id_actual=gd.busca_carpeta(ruta_alternativa)
+                        
+                    elif existe=="error" and i==0:                        
+                        gd.crear_carpeta(dividido[i],id_folder)
+                        ruta_alternativa+=dividido[i]+'/'
+                        id_actual=gd.busca_carpeta(ruta_alternativa)
+                        
+                    else:
+                        if i>0:
+                            ruta_alternativa+=dividido[i]+'/'
+                            id_actual=existe
+                        elif i==0:
+                            id_actual=existe
+                        
+            else:
+                ruta_existe=True
+
+            if ruta_existe==True:
+                gd.crear_archivo_texto(create_name,create_body,existe)
+                messagebox.showinfo("Create", "Archivo creado exitosamente")
+                
+            else:
+                #crear carpeta y despues txt
+                existe=gd.busca_carpeta(create_path)
+                gd.crear_archivo_texto(create_name,create_body,existe)
+                messagebox.showinfo("Create", "Archivo creado exitosamente")               
+            
     #boton
     boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar,font=("Arial",14,"bold"),background="#5DADE2")
     boton_config.place(x=250,y=340)  
@@ -197,16 +252,49 @@ def emergente_delete():
     ventana_emergente = tk.Toplevel(ventana)
     def enviar():
         global delete_path,delete_name
-        delete_name=entrada3.get()
-        delete_path=entrada.get()
-        ruta_total= "Archivos"+delete_path+delete_name      
-        if os.path.exists(ruta_total):
-            # Eliminar el archivo
-            archivo=ruta_total
-            os.remove(archivo)
-            messagebox.showinfo("Delete", "Archivo eliminado exitosamente")
+        if configure_type=="local":
+            delete_name=entrada3.get()
+            delete_path=entrada.get()
+            if delete_name !="":
+                ruta_total= "Archivos"+delete_path+delete_name    
+            else:
+                ruta_total= "Archivos"+delete_path 
+            if os.path.exists(ruta_total) and delete_name!="":
+                # Eliminar el archivo
+                archivo=ruta_total
+                os.remove(archivo)
+                messagebox.showinfo("Delete", "Archivo eliminado exitosamente")
+            elif os.path.exists(ruta_total) and delete_name=="":
+                ruta_carpeta=ruta_total[:-1]
+                shutil.rmtree(ruta_carpeta)
+                messagebox.showinfo("Delete", "Carpeta eliminada correctamente")
+            elif not os.path.exists(ruta_total):
+                messagebox.showinfo("Delete", "Ruta incorrecta o no existe el archivo")
         else:
-            messagebox.showinfo("Delete", "Ruta incorrecta o no existe el archivo")
+            delete_name=entrada3.get()
+            delete_path="Archivos"+entrada.get()
+            
+            id=gd.busca_carpeta(delete_path)
+            
+            if id=="error":
+                messagebox.showinfo("Delete", "Ruta incorrecta o no existe el archivo")
+            else:
+                if delete_name!="":
+                    id_file=  gd.buscar_archivos_en_carpeta(id,delete_name)
+                    print(id_file)
+            
+            if delete_name!="" and id!="error":
+                gd.eliminar_archvivo_por_id(id_file)
+                messagebox.showinfo("Delete", "Archivo eliminado correctamente.")
+
+            elif delete_name=="" and id!="error":
+                gd.eliminar_carpeta_por_id(id)
+                messagebox.showinfo("Delete", "Carpeta eliminada correctamente.")
+
+
+            
+
+
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("delete")
     ventana_emergente.geometry("500x400")
@@ -659,13 +747,13 @@ def backup():
     if configure_type=="local":
         #hacer backup a la nube
         try:
-            ruta_descarga = 'C:/Users/Paulo/Documents/Vacas Junio 2023/Lab archivos/Proyectos/Proyecto1/Archivos'
-            gd.subir_back(ruta_descarga,id_folder)
+            ruta_carpeta = 'C:/Users/Paulo/Documents/Vacas Junio 2023/Lab archivos/Proyectos/Proyecto1/Archivos'
+            gd.subir_back(ruta_carpeta,id_folder)
             messagebox.showinfo("Drive", "correcto")
         except:
             messagebox.showinfo("Drive", "error")
     else:
-        pass
+        print("haciendo back de nuve a local")
 
 #botones
 boton_config = tk.Button(ventana,text="Configure",cursor="hand2",command=emergente_configure, font=("Arial",14,"bold"),background="#5DADE2")
