@@ -1,6 +1,5 @@
 import datetime
-
-from
+from login import *
 
 ArregloBitacora = []
 
@@ -22,11 +21,37 @@ def CrearArreglo(tabla):
     for i in tabla:
         ArregloBitacora.append(i)
 
-def escribirBitacora(tabla, modo):
+def escribirBitacora(modo,clave):
+    contenido = ""
+    ClaveEncriptacion = convertir_a_hexadecimal(clave)
 
     if modo == "false":
-        for i in tabla:
+        for i in ArregloBitacora:
+            linea = i.fecha + " | " + i.hora + " | Tipo: " + i.tipo + " | " + i.des + "\n"
+            contenido += linea
+
+        HF = HorayFecha()
+        HF1 = HF[1].split("/")
+        HF2 = HF1[2] + "/" + HF1[1] + "/" + HF[0] + "/"
+
+        os.makedirs("/Users/admin/Downloads/Archivos/logs/" + HF2, exist_ok=True)
+        f = open("/Users/admin/Downloads/Archivos/logs/" + HF2 + "log_archivos.txt", "a")
+        f.write(contenido)
+        f.close()
 
 
     if modo == "true":
-        for i in tabla:
+        for i in ArregloBitacora:
+            linea = i.fecha + " | " + i.hora +" | Tipo: " + i.tipo + " | " + i.des + "\n"
+            encriptado = encriptar_contraseña(linea,ClaveEncriptacion)
+            contenido += encriptado
+
+        HF = HorayFecha()
+        HF1 = HF[1].split("/")
+        HF2=HF1[2]+"/"+HF1[1]+"/"+HF[0]+"/"
+
+        os.makedirs("/Users/admin/Downloads/Archivos/logs/" + HF2, exist_ok=True)
+        f = open( "/Users/admin/Downloads/Archivos/logs/"+HF2+"log_archivos.txt", "a")
+        f.write(contenido)
+        f.close()
+
