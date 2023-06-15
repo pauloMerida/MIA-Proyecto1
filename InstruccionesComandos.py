@@ -1,6 +1,7 @@
 import os
 import shutil
 from bitacora import *
+from analizador import *
 
 ArregloParaBitacora = []
 
@@ -133,53 +134,166 @@ def local(tabla,modo):
 
             if modo == i.get("mode"):
                 if os.path.exists(ruta + i.get("from")):
+                    HF1 = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF1[1], HF1[0], "Entrada",
+                                 "Comando: transfer | Moviendo: " + i.get("from") + " a ruta: " + i.get("to")))
+
                     if os.path.exists(ruta+i.get("to")+nombre_archivo):
-                        nombre = nombre_archivo.split(".")
-                        with open(ruta+i.get("from"), "r") as archivo_origen:
-                            contenido = archivo_origen.read()
-                        with open(ruta+i.get("to+")+"/"+nombre[0]+str(index)+"."+nombre[1], "w") as archivo_destino:
-                            archivo_destino.write(contenido)
-                        os.remove(ruta + i.get("from"))
+
+                        try:
+                            nombre = nombre_archivo.split(".")
+                            with open(ruta+i.get("from"), "r") as archivo_origen:
+                                contenido = archivo_origen.read()
+                            with open(ruta+i.get("to+")+"/"+nombre[0]+str(index)+"."+nombre[1], "w") as archivo_destino:
+                                archivo_destino.write(contenido)
+                            os.remove(ruta + i.get("from"))
+
+                            HF2 = HorayFecha()
+                            ArregloParaBitacora.append(
+                                bitacora(HF2[1], HF2[0], "Salida",
+                                         "Comando: transfer | " + i.get("from") + " movido exitosamente a ruta: " + i.get("to")))
+                        except:
+                            HF = HorayFecha()
+                            ArregloParaBitacora.append(bitacora(HF[1], HF[0], "ERROR",
+                                                                "Comando: transfer | La ruta " + i.get(
+                                                                    "from") + " no pudo moverse a "+i.get("to")))
+
                     else:
-                        shutil.move(ruta+i.get("from"), ruta+i.get("to"))
+                        try:
+                            shutil.move(ruta+i.get("from"), ruta+i.get("to"))
+                            HF2 = HorayFecha()
+                            ArregloParaBitacora.append(
+                                bitacora(HF2[1], HF2[0], "Salida",
+                                         "Comando: transfer | " + i.get("from") + " movido exitosamente a ruta: " + i.get("to")))
+                        except:
+                            HF = HorayFecha()
+                            ArregloParaBitacora.append(bitacora(HF[1], HF[0], "ERROR",
+                                                                "Comando: transfer | La ruta " + i.get(
+                                                                    "from") + " no pudo moverse a " + i.get("to")))
+
                 else:
-                    # hay que poner el error en la bitacora
-                    print("La ruta no se refiere a un archivo.")
+                        HF = HorayFecha()
+                        ArregloParaBitacora.append( bitacora(HF[1], HF[0], "ERROR", "Comando: transfer | La ruta " + i.get("from") + " no existe."))
             else:
-                # hay que poner el error en la bitacora
-                print("La ruta no se refiere a un archivo.")
+                HF = HorayFecha()
+                ArregloParaBitacora.append(
+                    bitacora(HF[1], HF[0], "ERROR",
+                             "Comando: transfer | El modo " + i.get("mode") + " debe ser igual al del comando configure."))
 
         elif comando == "rename":
                 directorio_padre = os.path.dirname(i.get("path"))
                 if os.path.exists(ruta + i.get("path")):
+                    HF1 = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF1[1], HF1[0], "Entrada",
+                                 "Comando: rename | Renombrando: " + i.get("path") + " como: " + i.get("to")))
+
                     if os.path.exists(ruta + directorio_padre + i.get("name")):
-                        # hay que poner el error en la bitacora
-                        print("La ruta no se refiere a un archivo.")
+                        HF = HorayFecha()
+                        ArregloParaBitacora.append(
+                            bitacora(HF[1], HF[0], "ERROR",
+                                     "Comando: rename | El archivo " + i.get("name") + " ya existe."))
                     else:
-                        os.rename(ruta + i.get("path"), i.get("name"))
+                        try:
+                            os.rename(ruta + i.get("path"), i.get("name"))
+                            HF2 = HorayFecha()
+                            ArregloParaBitacora.append(
+                                bitacora(HF2[1], HF2[0], "Salida",
+                                         "Comando: rename | " + i.get("path") + " renombrado exitosamente como " + i.get("name")))
+                        except:
+                            HF = HorayFecha()
+                            ArregloParaBitacora.append(
+                                bitacora(HF[1], HF[0], "ERROR",
+                                         "Comando: rename | La ruta " + i.get("path") + " no pudo renonmbrase como: "+i.get("name")))
+
                 else:
-                    # hay que poner el error en la bitacora
-                    print("La ruta no se refiere a un archivo.")
+                    HF = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF[1], HF[0], "ERROR", "Comando: rename | La ruta " + i.get("path") + " no existe."))
 
         elif comando == "modify":
+
             if os.path.exists(ruta + i.get("path")):
-                f = open(ruta + i.get("path"), "w")
-                f.write(i.get("body"))
-                f.close()
+                HF1 = HorayFecha()
+                ArregloParaBitacora.append(
+                    bitacora(HF1[1], HF1[0], "Entrada",
+                             "Comando: modify | Modificando: " + i.get("path")))
+
+                try:
+                    f = open(ruta + i.get("path"), "w")
+                    f.write(i.get("body"))
+                    f.close()
+
+                    HF2 = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF2[1], HF2[0], "Salida",
+                                 "Comando: modify | " + i.get("path") + " modificado exitosamente."))
+                except:
+                    HF = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF[1], HF[0], "ERROR", "Comando: modify | La ruta " + i.get("path") + " no pudo modificarse."))
             else:
-                # hay que poner el error en la bitacora
-                print("La ruta no se refiere a un archivo.")
+                HF = HorayFecha()
+                ArregloParaBitacora.append(
+                    bitacora(HF[1], HF[0], "ERROR", "Comando: modify | La ruta " + i.get("path") + " no existe."))
 
         elif comando == "add":
+
             if os.path.exists(ruta + i.get("path")):
-                f = open(ruta + i.get("path"), "a")
-                f.write(i.get("body"))
-                f.close()
+                HF1 = HorayFecha()
+                ArregloParaBitacora.append(
+                    bitacora(HF1[1], HF1[0], "Entrada",
+                             "Comando: add | Agregando contenido a: " + i.get("path")))
+
+                try:
+                    f = open(ruta + i.get("path"), "a")
+                    f.write(i.get("body"))
+                    f.close()
+
+                    HF2 = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF2[1], HF2[0], "Salida",
+                                 "Comando: add | Se agreago contenido a: " + i.get("path") + "  exitosamente."))
+                except:
+                    HF = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF[1], HF[0], "ERROR", "Comando: add | No se pudo agregar contenido a: " + i.get("path")))
+
             else:
-                # hay que poner el error en la bitacora
-                print("La ruta no se refiere a un archivo.")
+                HF = HorayFecha()
+                ArregloParaBitacora.append(
+                    bitacora(HF[1], HF[0], "ERROR",
+                             "Comando: add | La ruta " + i.get("path") + " no existe."))
 
         elif comando == "backup":
             print("hola")
+
+        elif comando == "exec":
+            HF1 = HorayFecha()
+            ArregloParaBitacora.append(
+                bitacora(HF1[1], HF1[0], "Entrada",
+                         "Comando: exec | Leyendo y ejecutando: " + i.get("path")))
+            try:
+
+                f = open(ruta + i.get("path"), "r")
+                contenido = f.read()
+                f.close()
+
+                a = analizador()
+                a.analizar(contenido)
+
+                HF2 = HorayFecha()
+                ArregloParaBitacora.append(
+                    bitacora(HF2[1], HF2[0], "Salida",
+                             "Comando: exec | Se leyo y ejecuto contenido de: " + i.get("path")))
+
+
+            except:
+                HF = HorayFecha()
+                ArregloParaBitacora.append(
+                    bitacora(HF[1], HF[0], "ERROR",
+                             "Comando: exec | El archivo " + i.get("path") + " no pudo leerse."))
+
 
 
