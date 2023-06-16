@@ -27,7 +27,7 @@ def crear_archivo_texto(nombre_archivo,contenido,id_folder):
                                                     "id": id_folder}]})
     archivo.SetContentString(contenido)
     archivo.Upload()
-
+    
 
 # SUBIR UN ARCHIVO A DRIVE
 def subir_archivo(ruta_archivo,id_folder):
@@ -98,6 +98,50 @@ def eliminar_archvivo_por_id(file_id):
     credenciales = login()
     credenciales.CreateFile({'id': file_id}).Delete()
 
+#COPIAR ARCHIVO 
+def copiar_archivo(id_archivo, id_carpeta_destino,id_origen):
+    credenciales = login()
+ 
+#COPIAR CARPETA
+def copiar_carpeta(id_carpeta, id_carpeta_destino):
+    credenciales = login()
+    # Crear objeto de archivo y configurar identificación y carpeta destino
+    file = credenciales.CreateFile({'id': id_carpeta})
+
+    # Copiar la carpeta en la carpeta destino
+    copied_file = credenciales.CreateFile({'title': file['title'],'mimeType': 'application/vnd.google-apps.folder', 'parents': [{'id': id_carpeta_destino}]})
+    copied_file.metadata_update = {'copyRequiresWriterPermission': True}
+    copied_file.Upload()
+
+def copy_folder(source_folder_id, destination_folder_id):
+    try:
+        credenciales = login()
+        source_folder = credenciales.CreateFile({'id': source_folder_id})
+        source_folder.FetchMetadata(fields='title')
+        
+        copied_folder = credenciales.CreateFile({
+            'title': source_folder['title'],
+            'parents': [{'id': destination_folder_id}],
+            'mimeType': 'application/vnd.google-apps.folder'
+        })
+        copied_folder.Upload()
+        
+        # Copiar los archivos y subcarpetas de la carpeta
+        file_list = credenciales.ListFile({'q': f"'{source_folder_id}' in parents and trashed=false"}).GetList()
+        for file in file_list:
+            if file['mimeType'] == 'application/vnd.google-apps.folder':
+                copy_folder(file['id'], copied_folder['id'])
+            else:
+                copied_file = credenciales.CreateFile({'title': file['title'], 'parents': [{'id': copied_folder['id']}]})
+                contenido = file.GetContentString()
+                copied_file.SetContentString(contenido)
+                copied_file.Upload()
+                '''archivo = credenciales.CreateFile({'title': nombre_archivo,\
+                                       'parents': [{"kind": "drive#fileLink",\
+                                                    "id": id_folder}]})
+                     archivo.SetContentString(contenido)'''
+    except:
+        pass
 #ELIMINAR CARPETA MEDIANTE EL ID
 def eliminar_carpeta_por_id(folder_id):
     credenciales = login()

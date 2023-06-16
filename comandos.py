@@ -281,7 +281,7 @@ def emergente_delete():
             else:
                 if delete_name!="":
                     id_file=  gd.buscar_archivos_en_carpeta(id,delete_name)
-                    print(id_file)
+                    
             
             if delete_name!="" and id!="error":
                 gd.eliminar_archvivo_por_id(id_file)
@@ -327,6 +327,7 @@ def emergente_copy():
     #funcion enviar
     def enviar():
         global copy_from,copy_to
+        ruta_respaldo = 'C:/Users/Paulo/Documents/Vacas Junio 2023/Lab archivos/Proyectos/Proyecto1/Respaldo/'
         es_archivo=False
         copy_from=entrada.get()
         ruta="Archivos"+copy_from
@@ -334,30 +335,66 @@ def emergente_copy():
         resultados = re.findall(r'\b\w+\.txt\b', copy_from)  
         for resultado in resultados:            
             es_archivo=True
+        if configure_type =="local":
             
-        copy_to="Archivos"+entrada3.get()
-        
-        if es_archivo==False:
-            try:
-                if os.path.exists(copy_to) and os.path.exists(copy_from):
-                    
-                    shutil.copytree(copy_from, copy_to,dirs_exist_ok=True)
-                    messagebox.showinfo("Copy", "carpeta copiada correctamente")
-                else:
-                    messagebox.showinfo("Copy", "La ruta no existe") 
-            except:
-                messagebox.showinfo("Copy", "No se pudo copiar la carpeta")
-        elif es_archivo==True:
-            print("es archivo")
-            try:
-                if os.path.exists(copy_to) and os.path.exists(copy_from):                
-                    shutil.copy2(copy_from, copy_to)
-                    messagebox.showinfo("Copy", "archivo copiado correctamente")
-                else:
-                    messagebox.showinfo("Copy", "La ruta no existe") 
-            except:
-                messagebox.showinfo("Copy", "No se pudo copiar el archivo")
-        
+                
+            copy_to="Archivos"+entrada3.get()
+            
+            if es_archivo==False:
+                try:
+                    if os.path.exists(copy_to) and os.path.exists(copy_from):
+                        
+                        shutil.copytree(copy_from, copy_to,dirs_exist_ok=True)
+                        messagebox.showinfo("Copy", "carpeta copiada correctamente")
+                    else:
+                        messagebox.showinfo("Copy", "La ruta no existe") 
+                except:
+                    messagebox.showinfo("Copy", "No se pudo copiar la carpeta")
+            elif es_archivo==True:
+                
+                try:
+                    if os.path.exists(copy_to) and os.path.exists(copy_from):                
+                        shutil.copy2(copy_from, copy_to)
+                        messagebox.showinfo("Copy", "archivo copiado correctamente")
+                    else:
+                        messagebox.showinfo("Copy", "La ruta no existe") 
+                except:
+                    messagebox.showinfo("Copy", "No se pudo copiar el archivo")
+        else:
+            copy_to="Archivos"+entrada3.get()
+            if es_archivo==True:
+                try:
+                    existe_origen=False
+                    existe_destino=False
+                    dividido=copy_from.split("/")
+                    parametro=dividido[len(dividido)-1]
+                    ruta_carpeta=copy_from.replace(parametro,"")
+                    id_folder=gd.busca_carpeta(ruta_carpeta) 
+                    if id_folder!="error":
+                        existe_origen=True
+                    id_file=gd.buscar_archivos_en_carpeta(id_folder,parametro)                
+                    id_destino=gd.busca_carpeta(copy_to) 
+                    if id_destino!="error":
+                        existe_destino=True
+
+                    if existe_destino==True and existe_origen==True:      
+                            
+                        gd.bajar_archivo_por_id(id_file,ruta_respaldo)
+                        gd.subir_archivo(ruta_respaldo+parametro,id_destino)
+                        messagebox.showinfo("Copy", "Se copio correctamente el archivo en la nube")
+                    else:
+                        messagebox.showinfo("Copy", "Ruta erronea de la nube")
+                except:
+                   messagebox.showinfo("Copy", "Ruta erronea de la nube") 
+
+            else:
+                dividido=copy_from.split("/")
+                parametro=dividido[len(dividido)-1]
+                ruta_carpeta=copy_from.replace(parametro,"")
+                id_origen=gd.busca_carpeta(ruta_carpeta) 
+                id_destino=gd.busca_carpeta(copy_to) 
+                gd.copy_folder(id_origen,id_destino)
+                messagebox.showinfo("Copy", "Se copio correctamente la carpeta en la nube")
 
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("Copy")
