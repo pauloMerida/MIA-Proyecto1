@@ -1,6 +1,7 @@
 import datetime
 from login import *
 
+global ArregloBitacora
 ArregloBitacora = []
 
 class bitacora:
@@ -38,6 +39,7 @@ def escribirBitacora(modo,clave):
         f = open("/Users/admin/Downloads/Archivos/logs/" + HF2 + "log_archivos.txt", "a")
         f.write(contenido)
         f.close()
+        ArregloBitacora.clear()
 
 
     if modo == "true":
@@ -54,4 +56,5 @@ def escribirBitacora(modo,clave):
         f = open( "/Users/admin/Downloads/Archivos/logs/"+HF2+"log_archivos.txt", "a")
         f.write(contenido)
         f.close()
+        ArregloBitacora.clear()
 

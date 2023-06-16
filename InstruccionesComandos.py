@@ -1,7 +1,8 @@
 import os
 import shutil
-from bitacora import *
+from BitacoraAcciones import *
 from analizador import *
+from login import *
 
 ArregloParaBitacora = []
 
@@ -10,13 +11,20 @@ def EjecutarComandos(tabla):
     for i in tabla:
         if i.get("comando") == "configure":
             if i.get("type") == "local":
-                    local(tabla,"local")
+                    local(tabla,"local",i.get("encrypt_read"),i.get("encrypt_log"),i.get("llave"))
+                    CrearArreglo(ArregloBitacora)
+                    escribirBitacora(i.get("encrypt_log"),i.get("llave"))
+                    ArregloBitacora.clear()
+
             elif i.get("type") == "cloud":
                     nube(tabla,"cloud")
             else:
-                print("error",)
+                HF = HorayFecha()
+                ArregloParaBitacora.append(
+                    bitacora(HF[1], HF[0], "ERROR",
+                             "Comando: configure | El parametro " + i.get("type") + " no existe."))
 
-def local(tabla,modo):
+def local(tabla,modo,encriptado,bitacorae,llave):
     index = 1
     for i in tabla:
         comando = i.get("comando")
@@ -275,18 +283,41 @@ def local(tabla,modo):
                 bitacora(HF1[1], HF1[0], "Entrada",
                          "Comando: exec | Leyendo y ejecutando: " + i.get("path")))
             try:
+                CrearArreglo(ArregloBitacora)
+                escribirBitacora(bitacorae,llave)
+                ArregloBitacora.clear()
 
-                f = open(ruta + i.get("path"), "r")
-                contenido = f.read()
-                f.close()
+                if encriptado == "false":
+                    f = open(ruta + i.get("path"), "r")
+                    contenido = f.read()
+                    f.close()
 
-                a = analizador()
-                a.analizar(contenido)
+                    a = analizador()
+                    a.analizar(contenido)
 
-                HF2 = HorayFecha()
-                ArregloParaBitacora.append(
-                    bitacora(HF2[1], HF2[0], "Salida",
-                             "Comando: exec | Se leyo y ejecuto contenido de: " + i.get("path")))
+                    HF2 = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF2[1], HF2[0], "Salida",
+                                 "Comando: exec | Se leyo y ejecuto contenido de: " + i.get("path")))
+                elif encriptado == "true":
+                    f = open(ruta + i.get("path"), "r")
+                    contenido = f.read()
+                    f.close()
+
+                    contenidodes = desencriptar_contraseña(contenido, llave)
+                    a = analizador()
+                    a.analizar(contenidodes)
+
+                    HF2 = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF2[1], HF2[0], "Salida",
+                                 "Comando: exec | Se leyo y ejecuto contenido de: " + i.get("path")))
+                else:
+                    HF = HorayFecha()
+                    ArregloParaBitacora.append(
+                        bitacora(HF[1], HF[0], "ERROR",
+                                 "Comando: exec | El parametro para desencriptar " + encriptado + " no existe."))
+
 
 
             except:
@@ -294,6 +325,5 @@ def local(tabla,modo):
                 ArregloParaBitacora.append(
                     bitacora(HF[1], HF[0], "ERROR",
                              "Comando: exec | El archivo " + i.get("path") + " no pudo leerse."))
-
 
 
