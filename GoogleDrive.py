@@ -239,8 +239,24 @@ def busca_carpeta(ruta_carpeta):
             return carpeta_padre
     except:
         return "error"
-    
 
+def verificar_archivos_carpetas_repetidas(folder_id,name):
+    credenciales=login()
+    file_list = credenciales.ListFile({'q': f"'{folder_id}' in parents and trashed=false"}).GetList()
+    list=[]
+    parametro=False
+    for file in file_list:       
+        if name==file['title']:
+            parametro=True        
+    return parametro
+
+def renombrar(file_id,new_name):
+    credenciales=login()   
+    file = credenciales.CreateFile({'id': file_id})
+    file.FetchMetadata()
+    # Cambiar el nombre del archivo
+    file['title'] = new_name
+    file.Upload()
 if __name__ == "__main__":
     ruta_archivo = '/home/falv/Escritorio/fondo.jpg'
     id_folder = '1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo'

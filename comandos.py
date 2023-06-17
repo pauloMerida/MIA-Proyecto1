@@ -171,10 +171,7 @@ def emergente_create():
 
     entrada3= tk.Entry(ventana_emergente,textvar=path,width=20, relief="flat",font=("Arial",14,"bold"))
     entrada3.place(x=200,y=210)
-    #funcion respaldo
-    def carpetas_drive():
-        pass
-
+    
     #funcion enviar
     def enviar():
         global configure_type
@@ -388,13 +385,14 @@ def emergente_copy():
                    messagebox.showinfo("Copy", "Ruta erronea de la nube") 
 
             else:
-                dividido=copy_from.split("/")
-                parametro=dividido[len(dividido)-1]
-                ruta_carpeta=copy_from.replace(parametro,"")
-                id_origen=gd.busca_carpeta(ruta_carpeta) 
+               
+                id_origen=gd.busca_carpeta(copy_from) 
                 id_destino=gd.busca_carpeta(copy_to) 
-                gd.copy_folder(id_origen,id_destino)
-                messagebox.showinfo("Copy", "Se copio correctamente la carpeta en la nube")
+                if id_origen!="error" and id_destino!="error":
+                    gd.copy_folder(id_origen,id_destino)
+                    messagebox.showinfo("Copy", "Se copio correctamente la carpeta en la nube")
+                else:
+                    messagebox.showinfo("Copy", "La ruta es incorrecta") 
 
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("Copy")
@@ -433,126 +431,244 @@ def emergente_transfer():
         destino=[]
         transfer_from="Archivos"+entrada.get()
         transfer_to="Archivos"+entrada3.get()
-        
+
         resultados = re.findall(r'\b\w+\.txt\b', transfer_from)  
         for resultado in resultados:            
             es_archivo=True
 
-        if es_archivo==False:
-            try:
-                if  os.path.exists(transfer_from):
-                    # Renombrar archivos o carpetas con el mismo nombre en el destino
-                    contenido = os.listdir(transfer_from)                   
-                    for elemento in contenido:
-                        origen.append(elemento)
-                  
-                    contenido = os.listdir(transfer_to)                  
-                    for elemento in contenido:
-                        destino.append(elemento)                    
-                    encontro=False
-                    contador=0
-                    reiniciar=True
-                    for i in range(0,len(origen)):
-                        nombre_origen=origen[i]
-                        while reiniciar:
-                            contador+=1
-                            for o in range(0,len(destino)):
-                                
-                                nombre_destino=destino[o]
-                                if nombre_destino==nombre_origen:
-                                    encontro=True
-                                    nombre_base, extension = os.path.splitext(nombre_origen)
-                                    nombre_origen=nombre_base+"(nuevo)"+extension 
-                                    break
-                            if contador==50:
-                                reiniciar=False
-                        if encontro==True:
-                            original=origen[i]
-                            #print("nombre original: "+original+" resultante: "+nombre_origen)
-                            if original.endswith(".txt"):
-                                ruta_archivo=transfer_from+original 
-                                ruta_carpeta_actual = os.path.abspath(ruta_archivo) 
-                                ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual), nombre_origen)
-                                os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)                                                             
-                                #print("ruta archivo"+ruta_archivo)
-                                #print("se cambio el nombre del archivo")
-                            else:
-
-                                ruta=transfer_from+original 
-                                ruta_carpeta_actual = os.path.abspath(ruta) 
-                                ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual), nombre_origen)
-                                os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)                             
-                                #print("ruta carpeta: "+ruta)
-                                #print("se cambio el nombre de la carpeta")
-                        encontro=False
-                        reiniciar=True
-                        contador=0
-                    shutil.copytree(transfer_from, transfer_to,dirs_exist_ok=True)                    
-                    messagebox.showinfo("Transfer", "carpeta transferida correctamente")
-                    shutil.rmtree(transfer_from)
-                    origen.clear()
-                    destino.clear()
-                else:
-                    messagebox.showinfo("Transfer", "La ruta no existe") 
-            except:
-                messagebox.showinfo("Transfer", "No se pudo transferir la carpeta")
-        elif es_archivo==True:
-           
-            try:
-                if os.path.exists(transfer_from) and os.path.exists(transfer_to):                
-                    
+        if transfer_mode =="Local":
+            
+            if es_archivo==False:
+                if os.path.exists(transfer_from):
+                    #extraer nombre de la carpeta
+                    dividido=transfer_from.split("/")
+                    nombre_carpeta=dividido[len(dividido)-2]
+                    #si no existe la ruta destino la crea
+                    if not os.path.exists(transfer_to):
+                        os.makedirs(transfer_to)
+                        
+                    #listar contenido de la carpeta destino y verificar nombres
+                    contenido_carpeta = os.listdir(transfer_to)
+                    condicion=True
                     repetido=False
-                    contenido = os.listdir(transfer_to) 
-                    
-                    dividido=transfer_from.split('/')
-                    archivo= dividido[len(dividido)-1]         
-                    for elemento in contenido:
-                        if elemento==archivo:
-                            repetido=True
-                        destino.append(elemento)                    
-                    encontro=False
                     contador=0
-                    reiniciar=True
-                    if repetido==True:
-                            while reiniciar:
+                    if len(contenido_carpeta)>0:
+                        while condicion:
+                            for elemento in contenido_carpeta:
+                                if elemento==nombre_carpeta:
+                                    nombre_carpeta+="(c)" 
+                                    repetido=True
+                                    contador=0
                                 contador+=1
-                                for o in range(0,len(destino)):
-                                    
-                                    nombre_destino=destino[o]
-                                    if nombre_destino==archivo:
-                                        encontro=True
-                                        nombre_base, extension = os.path.splitext(archivo)
-                                        nombre_origen=nombre_base+"(nuevo)"+extension 
-                                        break
-                                if contador==50:
-                                    reiniciar=False
-                            if encontro==True:
-                                    
-                                    #print("nombre original: "+original+" resultante: "+nombre_origen)
-                                    ruta_archivo=transfer_from
-                                    ruta_carpeta_actual = os.path.abspath(ruta_archivo) 
-                                    ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual), nombre_origen)
-                                    os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)   
-                                    transfer_from=transfer_from.replace(archivo,nombre_origen)   
-                                    shutil.move(transfer_from, transfer_to)    
-                                    print("TF"+transfer_from)                                                
-                                
-                            encontro=False
-                            reiniciar=True
-                            contador=0
-                            origen.clear()
-                            destino.clear()
-                            messagebox.showinfo("Transfer", "archivo transferido correctamente(igual)")
+                                if contador==len(contenido_carpeta)-1:
+                                    condicion=False
                     else:
-                        shutil.move(transfer_from, transfer_to) 
-                        messagebox.showinfo("Transfer", "archivo transferido correctamente")
-                    
-                else:
-                    messagebox.showinfo("Transfer", "La ruta no existe") 
-            except:
-                messagebox.showinfo("Transfer", "No se pudo transferir el archivo")
+                        repetido=False
+                    #renombrar si la carpeta esta repetida
+                    if repetido==True:
+                        ruta=transfer_from[:-1]
+                        os.rename(ruta, os.path.join(os.path.dirname(ruta), nombre_carpeta))   
+                    #mover a nueva ubicación
+                    if repetido==False:
+                        try:
+                            ruta_origen=transfer_from[:-1]
+                            ruta_destino=transfer_to[:-1]
+                            shutil.move(ruta_origen, ruta_destino)
+                            messagebox.showinfo("Transer", "Se movio la carpeta")
+                        except:
+                            messagebox.showinfo("Transer", "Ocurrio un error al mover la carpeta")
+                    else:
+                        dividido=transfer_from.split("/")
+                        nombre_original=dividido[len(dividido)-2]
+                        copia_ruta=transfer_from.replace(nombre_original,nombre_carpeta)
+                        ruta_origen=copia_ruta[:-1]
+                        ruta_destino=transfer_to[:-1]
+                        shutil.move(ruta_origen, ruta_destino)
+                        messagebox.showinfo("Transer", "Se movio la carpeta")
+                        
 
-        
+                else:
+                    messagebox.showinfo("Transer", "La ruta de origen no existe")
+            elif es_archivo==True:
+                
+                #verificar si existe la ruta de origen
+                if os.path.exists(transfer_from):
+                    #extraer el nombre del archivo
+                    dividido=transfer_from.split("/")
+                    nombre_archivo=dividido[len(dividido)-1]
+                    #si no existe la ruta destino la crea
+                    if not os.path.exists(transfer_to):
+                        os.makedirs(transfer_to)
+                    
+                    #listar contenido de la carpeta destino y verificar nombres
+                    contenido_carpeta = os.listdir(transfer_to)
+                    condicion=True
+                    repetido=False
+                    contador=0
+                    if len(contenido_carpeta)>0:
+                        while condicion:
+                            for elemento in contenido_carpeta:
+                                if elemento==nombre_archivo:
+                                    aux=nombre_archivo.replace(".txt","")
+                                    aux+="(c)"+".txt" 
+                                    nombre_archivo=aux
+                                    repetido=True
+                                    contador=0
+                                contador+=1
+                                if contador==len(contenido_carpeta)-1:
+                                    condicion=False
+                    else:
+                        repetido=False
+
+                    #renombrar si el archivo esta repetido
+                    if repetido==True:
+                        
+                        os.rename(transfer_from, os.path.join(os.path.dirname(transfer_from), nombre_archivo))   
+                    #mover a nueva ubicación
+                    if repetido==False:
+                        try:
+                            ruta_destino=transfer_to[:-1]
+                            shutil.move(transfer_from, ruta_destino)
+                            messagebox.showinfo("Transer", "Se movio el archivo")
+                        except:
+                            messagebox.showinfo("Transer", "Ocurrio un error al mover el archivo")
+                    else:
+                        dividido=transfer_from.split("/")
+                        nombre_original=dividido[len(dividido)-1]
+                        copia_ruta=transfer_from.replace(nombre_original,nombre_archivo)
+                        ruta_destino=transfer_to[:-1]
+                        shutil.move(copia_ruta, ruta_destino)
+                        messagebox.showinfo("Transer", "Se movio el archivo")
+                else:                    
+                    messagebox.showinfo("Transer", "La ruta de origen no existe")
+
+                
+        else:
+            if es_archivo==True:
+                dividido=transfer_from.split('/')
+                archivo= dividido[len(dividido)-1]
+               
+                ruta_total_from=transfer_from.replace(archivo,"")
+                valido=gd.busca_carpeta(ruta_total_from) 
+
+                #verifico la ruta de origen
+                if valido!="error":  
+                    try:
+                        #obtengo el id de del archivo
+                        id_file=gd.buscar_archivos_en_carpeta(valido,archivo)
+                    except:
+                        messagebox.showinfo("Transer", "Error en el nombre del txt o en la ruta") 
+                else:
+                    messagebox.showinfo("Transer", "ruta de origen incorrecta") 
+
+
+                #verificar si la ruta destino existe
+                id_destino=gd.busca_carpeta(transfer_to)
+                if valido!="error" and id_destino=="error":
+                    #como no existe la ruta destino pero si la de origen creo las carpetas
+                    dividido=transfer_to.split("/")
+                    ruta=""
+                    for i in range(len(dividido)-1):
+                        if dividido[i]!="Archivos":
+                            
+                            carpeta_actual=ruta
+                            existe=gd.busca_carpeta(carpeta_actual)
+                            if existe=="error":
+                                #obtener ruta anterior
+                                dividido2=carpeta_actual.split("/")
+                                parametro=dividido2[len(dividido2)-2]
+                                ruta_anterior= carpeta_actual.replace(parametro,"")
+                                aux=ruta_anterior[:-1]
+                                ruta_anterior=aux
+                                existe=gd.busca_carpeta(ruta_anterior)
+                                ruta_anterior+=parametro+'/'
+                                ruta_anterior+=dividido[i+1]+'/'
+                                ruta=ruta_anterior
+                                #crear carpeta
+                                gd.crear_carpeta(parametro,existe)
+                            else:
+                                ruta+=dividido[i+1]+'/'
+                        elif dividido[i]=="Archivos":
+                            ruta="Archivos"+'/'+dividido[i+1]+'/'
+
+                #verificar nombres repetidos
+                dividido=transfer_from.split("/")
+                name=dividido[len(dividido)-1]
+                id_destino=gd.busca_carpeta(transfer_to)
+                repetido=gd.verificar_archivos_carpetas_repetidas(id_destino,name)
+                if repetido==True:
+                    condicion=True
+                    while condicion:
+                        aux=name.replace(".txt","")
+                        aux+="(c)"+".txt"
+                        name=aux
+                        condicion=gd.verificar_archivos_carpetas_repetidas(id_destino,name)
+                    #renombrar el archivo 
+                    gd.renombrar(id_file,name)                    
+                try:                        
+                    #muevo el archivo
+                    gd.mover_archivo(id_file,id_destino)
+                    messagebox.showinfo("Transer", "archivo movido")  
+                except:
+                    messagebox.showinfo("Transer", "Error al mover el archivo, verificar ruta o nombre del txt")
+
+
+            #es carpeta abajo procedimiento de carpeta
+            else:
+                
+                #obtengo el nombre de la carpeta
+                dividido=transfer_from.split("/")
+                name_carpet=dividido[len(dividido)-2]
+                #verifico rutas de origen y destino
+                id_origen=gd.busca_carpeta(transfer_from) 
+                id_destino=gd.busca_carpeta(transfer_to)
+
+                if id_origen!="error" and id_destino=="error":
+                    #como existe la ruta de origen y no la de destino procedo a crear la de destino
+                    dividido=transfer_to.split("/")
+                    ruta=""
+                    for i in range(len(dividido)-1):
+                        if dividido[i]!="Archivos":
+                            
+                            carpeta_actual=ruta
+                            existe=gd.busca_carpeta(carpeta_actual)
+                            if existe=="error":
+                                #obtener ruta anterior
+                                dividido2=carpeta_actual.split("/")
+                                parametro=dividido2[len(dividido2)-2]
+                                ruta_anterior= carpeta_actual.replace(parametro,"")
+                                aux=ruta_anterior[:-1]
+                                ruta_anterior=aux
+                                existe=gd.busca_carpeta(ruta_anterior)
+                                ruta_anterior+=parametro+'/'
+                                ruta_anterior+=dividido[i+1]+'/'
+                                ruta=ruta_anterior
+                                #crear carpeta
+                                gd.crear_carpeta(parametro,existe)
+                            else:
+                                ruta+=dividido[i+1]+'/'
+                        elif dividido[i]=="Archivos":
+                            ruta="Archivos"+'/'+dividido[i+1]+'/'
+                elif id_origen=="error":
+                    messagebox.showinfo("Transer", "ruta de origen incorrecta")
+                #verificar nombres repetidos
+                
+                id_destino=gd.busca_carpeta(transfer_to)
+                repetido=gd.verificar_archivos_carpetas_repetidas(id_destino,name_carpet)
+                if repetido==True:
+                    condicion=True
+                    while condicion:                        
+                        name_carpet+="(c)"
+                        condicion=gd.verificar_archivos_carpetas_repetidas(id_destino,name_carpet)
+                    #renombrar el archivo si esta repetido 
+                    gd.renombrar(id_origen,name_carpet)                    
+                try:                        
+                    #muevo el archivo
+                    gd.mover_archivo(id_origen,id_destino)
+                    messagebox.showinfo("Transer", "carpeta movida")  
+                except:
+                    messagebox.showinfo("Transer", "Error al mover la carpeta, verificar ruta")
+                 
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("Transfer")
     ventana_emergente.geometry("500x400")
@@ -572,8 +688,9 @@ def emergente_transfer():
     boton_config.place(x=250,y=340)    
 
     def seleccionar_opcion(event):
+        global transfer_mode
         seleccion = cuadro_seleccion.get()
-        print(f"Opción seleccionada: {seleccion}")
+        transfer_mode=seleccion
 
     # Crear el cuadro de selección
     opciones = ['Local', 'Cloud']
