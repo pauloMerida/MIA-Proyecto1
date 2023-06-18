@@ -1,4 +1,5 @@
 import tkinter as tk
+
 from tkinter import font
 from tkinter import messagebox
 from tkinter import ttk
@@ -6,6 +7,7 @@ from tkinter import messagebox
 import shutil
 import GoogleDrive as gd
 import os,re
+from analizador import analizador
 #variables globales de los comandos
 # comando configure 
 configure_type="local"
@@ -39,6 +41,7 @@ add_body=""
 exec_path=""
 #ID carpeta archivos Drive
 id_folder = '1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo'
+
 #ventana principal TKinter
 ventana = tk.Tk()
 ventana.title("Consola")
@@ -1058,7 +1061,12 @@ boton_sesion.place(x=800,y=380)
 
 boton_analizar = tk.Button(ventana,text="Analizar",cursor="hand2", font=("Arial",14,"bold"),background="#5DADE2")
 boton_analizar.place(x=600,y=635)
+boton_analizar.configure(command=lambda: Analizar_Codigo())
 
-
+a = analizador()
+def Analizar_Codigo():
+    editado = area_consola.get(1.0, tk.END)
+    analizador.analizar(editado)
+    messagebox.showinfo('Resultados', '¡Los datos han sido analizados exitosamente!')
 
 ventana.mainloop()
