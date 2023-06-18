@@ -116,166 +116,26 @@ def funcion_create(create_name,create_body,create_path):
                     messagebox.showinfo("Create", "Archivo creado exitosamente")               
 
 def funcion_delete(delete_path,delete_name):
-    global configure_type
-
-       
-#ventanas emergentes
-def emergente_configure():
-    global configure_type,configure_log,configure_read,configure_key
-    # Crear la ventana emergente
-    ventana_emergente = tk.Toplevel(ventana)
-    #funcion enviar
-    def enviar():
-        global configure_key
-        configure_key=entrada.get()
-        messagebox.showinfo("Configure", "Sistema configurado")
-        
-        
-    # Configurar propiedades de la ventana emergente
-    ventana_emergente.title("Configure")
-    ventana_emergente.geometry("500x400")
-    
-    # Contenido de la ventana emergente
-    label1 = tk.Label(ventana_emergente, text="Type",font=("Arial",16,"bold"))
-    label1.place(x=30,y=50)
-
-    label2 = tk.Label(ventana_emergente, text="Encrypt_log",font=("Arial",16,"bold"))
-    label2.place(x=30,y=130)
-
-    label3 = tk.Label(ventana_emergente, text="Encrypt_reada",font=("Arial",16,"bold"))
-    label3.place(x=30,y=210)
-
-    label4 = tk.Label(ventana_emergente, text="llave",font=("Arial",16,"bold"))
-    label4.place(x=30,y=290)
-    
-    #boton
-    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
-    boton_config.place(x=250,y=340)
-
-    def seleccionar_opcion(event):
         global configure_type
-        seleccion = cuadro_seleccion.get()
-
-        configure_type=seleccion
-       
-        
-
-    # Crear el cuadro de selección
-    opciones = ['local', 'cloud']
-    cuadro_seleccion = ttk.Combobox(ventana_emergente, values=opciones,font=("Arial",14,"bold"))
-    cuadro_seleccion.place(x=200,y=50)
-    cuadro_seleccion.bind("<<ComboboxSelected>>", seleccionar_opcion)
-
-    def seleccionar_opcion2(event):
-        global configure_log
-        seleccion = cuadro_seleccion2.get()
-        configure_log=seleccion
-      
-        
-        
-    # Crear el cuadro de selección
-    opciones2 = ['True', 'False']
-    cuadro_seleccion2 = ttk.Combobox(ventana_emergente, values=opciones2,font=("Arial",14,"bold"))
-    cuadro_seleccion2.place(x=200,y=130)
-    cuadro_seleccion2.bind("<<ComboboxSelected>>", seleccionar_opcion2)
-
-    def seleccionar_opcion3(event):
-        global configure_read
-        seleccion = cuadro_seleccion3.get()
-        configure_read=seleccion
-        
-       
-        
-    # Crear el cuadro de selección
-    opciones3 = ['True', 'False']
-    cuadro_seleccion3 = ttk.Combobox(ventana_emergente, values=opciones3,font=("Arial",14,"bold"))
-    cuadro_seleccion3.place(x=200,y=210)
-    cuadro_seleccion3.bind("<<ComboboxSelected>>", seleccionar_opcion3)
-
-    #cuadro de entrada
-    llave = tk.StringVar() 
-
-    entrada= tk.Entry(ventana_emergente,textvar=llave,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada.place(x=200,y=290)
-   
-def emergente_create():
-   
-    # Crear la ventana emergente
-    ventana_emergente = tk.Toplevel(ventana)
-   
-    # Configurar propiedades de la ventana emergente
-    ventana_emergente.title("Create")
-    ventana_emergente.geometry("500x400")
-    
-    # Contenido de la ventana emergente
-    label1 = tk.Label(ventana_emergente, text="Name",font=("Arial",16,"bold"))
-    label1.place(x=30,y=50)
-
-    label2 = tk.Label(ventana_emergente, text="Body",font=("Arial",16,"bold"))
-    label2.place(x=30,y=130)
-
-    label3 = tk.Label(ventana_emergente, text="Path",font=("Arial",16,"bold"))
-    label3.place(x=30,y=210)    
-
-    #cuadro de entrada
-    name = tk.StringVar() 
-
-    entrada= tk.Entry(ventana_emergente,textvar=name,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada.place(x=200,y=50)
-
-    body = tk.StringVar() 
-
-    entrada2= tk.Entry(ventana_emergente,textvar=body,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada2.place(x=200,y=130)
-
-    path = tk.StringVar() 
-
-    entrada3= tk.Entry(ventana_emergente,textvar=path,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada3.place(x=200,y=210)
-    
-    #funcion enviar
-    def enviar():
-       
-        global create_name,create_body,create_path,configure_type
-        create_name=entrada.get()
-        create_body=entrada2.get()
-        create_path="Archivos"+entrada3.get()
-        funcion_create(create_name,create_body,create_path)
-
-    #boton
-    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar,font=("Arial",14,"bold"),background="#5DADE2")
-    boton_config.place(x=250,y=340)  
-
-def emergente_delete():
-    global delete_path,delete_name,configure_type
-    # Crear la ventana emergente
-    ventana_emergente = tk.Toplevel(ventana)
-    def enviar():
-        global delete_path,delete_name,configure_type
-        if configure_type=="local":
-            delete_name=entrada3.get()
-            delete_path=entrada.get()
+        if configure_type=="local":            
             if delete_name !="":
-                ruta_total= "Archivos"+delete_path+delete_name    
+                delete_path+=delete_name 
             else:
-                ruta_total= "Archivos"+delete_path 
-            if os.path.exists(ruta_total) and delete_name!="":
+                pass            
+            if os.path.exists(delete_path) and delete_name!="":
                 # Eliminar el archivo
-                archivo=ruta_total
+                archivo=delete_path
                 os.remove(archivo)
                 messagebox.showinfo("Delete", "Archivo eliminado exitosamente")
-            elif os.path.exists(ruta_total) and delete_name=="":
-                ruta_carpeta=ruta_total[:-1]
+            elif os.path.exists(delete_path) and delete_name=="":
+                ruta_carpeta=delete_path[:-1]
                 shutil.rmtree(ruta_carpeta)
                 messagebox.showinfo("Delete", "Carpeta eliminada correctamente")
-            elif not os.path.exists(ruta_total):
+            elif not os.path.exists(delete_path):
                 messagebox.showinfo("Delete", "Ruta incorrecta o no existe el archivo")
-        else:
-            delete_name=entrada3.get()
-            delete_path="Archivos"+entrada.get()
+        else:            
             
-            id=gd.busca_carpeta(delete_path)
-            
+            id=gd.busca_carpeta(delete_path)            
             if id=="error":
                 messagebox.showinfo("Delete", "Ruta incorrecta o no existe el archivo")
             else:
@@ -291,55 +151,21 @@ def emergente_delete():
                 gd.eliminar_carpeta_por_id(id)
                 messagebox.showinfo("Delete", "Carpeta eliminada correctamente.")
 
-    # Configurar propiedades de la ventana emergente
-    ventana_emergente.title("delete")
-    ventana_emergente.geometry("500x400")
-    
-    # Contenido de la ventana emergente
-    label1 = tk.Label(ventana_emergente, text="path",font=("Arial",16,"bold"))
-    label1.place(x=30,y=50)
-
-    label2 = tk.Label(ventana_emergente, text="name",font=("Arial",16,"bold"))
-    label2.place(x=30,y=130)
-   
-    #boton
-    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
-    boton_config.place(x=250,y=340)    
-
-    #cuadro de entrada
-    name = tk.StringVar() 
-
-    entrada= tk.Entry(ventana_emergente,textvar=name,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada.place(x=200,y=50)
-
-    path = tk.StringVar() 
-
-    entrada3= tk.Entry(ventana_emergente,textvar=path,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada3.place(x=200,y=130)
-
-def emergente_copy():
-    # Crear la ventana emergente
-    ventana_emergente = tk.Toplevel(ventana)
-    #funcion enviar
-    def enviar():
-        global copy_from,copy_to,configure_type
+def funcion_copy(copy_from,copy_to):
+        global configure_type
         ruta_respaldo = 'C:/Users/Paulo/Documents/Vacas Junio 2023/Lab archivos/Proyectos/Proyecto1/Respaldo/'
         es_archivo=False
-        copy_from=entrada.get()
-        ruta="Archivos"+copy_from
-        copy_from=ruta
+       
         resultados = re.findall(r'\b\w+\.txt\b', copy_from)  
         for resultado in resultados:            
             es_archivo=True
         if configure_type =="local":
-            
-            copy_to="Archivos"+entrada3.get()
-            
+                        
             if es_archivo==False:
                 try:
                     if os.path.exists(copy_to) and os.path.exists(copy_from):
                         
-                        shutil.copytree(copy_from, copy_to,dirs_exist_ok=True)
+                        shutil.copytree(copy_from,copy_to)
                         messagebox.showinfo("Copy", "carpeta copiada correctamente")
                     else:
                         messagebox.showinfo("Copy", "La ruta no existe") 
@@ -356,7 +182,7 @@ def emergente_copy():
                 except:
                     messagebox.showinfo("Copy", "No se pudo copiar el archivo")
         else:
-            copy_to="Archivos"+entrada3.get()
+            
             if es_archivo==True:
                 try:
                     existe_origen=False
@@ -392,44 +218,9 @@ def emergente_copy():
                 else:
                     messagebox.showinfo("Copy", "La ruta es incorrecta") 
 
-    # Configurar propiedades de la ventana emergente
-    ventana_emergente.title("Copy")
-    ventana_emergente.geometry("500x400")
-    
-    # Contenido de la ventana emergente
-    label1 = tk.Label(ventana_emergente, text="from",font=("Arial",16,"bold"))
-    label1.place(x=30,y=50)
-
-    label2 = tk.Label(ventana_emergente, text="to",font=("Arial",16,"bold"))
-    label2.place(x=30,y=130)
-   
-    #boton
-    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
-    boton_config.place(x=250,y=340)    
-
-    #cuadro de entrada
-    fromm = tk.StringVar() 
-
-    entrada= tk.Entry(ventana_emergente,textvar=fromm,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada.place(x=200,y=50)
-
-    to = tk.StringVar() 
-
-    entrada3= tk.Entry(ventana_emergente,textvar=to,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada3.place(x=200,y=130)
-
-def emergente_transfer():
-    # Crear la ventana emergente
-    ventana_emergente = tk.Toplevel(ventana)
-    #funcion enviar
-    def enviar():
-        global transfer_from,transfer_to,transfer_mode
+def funcion_transfer(transfer_from,transfer_to,transfer_mode):
+            
         es_archivo=False
-        origen=[]
-        destino=[]
-        transfer_from="Archivos"+entrada.get()
-        transfer_to="Archivos"+entrada3.get()
-
         resultados = re.findall(r'\b\w+\.txt\b', transfer_from)  
         for resultado in resultados:            
             es_archivo=True
@@ -665,57 +456,9 @@ def emergente_transfer():
                     messagebox.showinfo("Transer", "carpeta movida")  
                 except:
                     messagebox.showinfo("Transer", "Error al mover la carpeta, verificar ruta")
-                 
-    # Configurar propiedades de la ventana emergente
-    ventana_emergente.title("Transfer")
-    ventana_emergente.geometry("500x400")
-    
-    # Contenido de la ventana emergente
-    label1 = tk.Label(ventana_emergente, text="from",font=("Arial",16,"bold"))
-    label1.place(x=30,y=50)
-
-    label2 = tk.Label(ventana_emergente, text="to",font=("Arial",16,"bold"))
-    label2.place(x=30,y=130)
-
-    label3 = tk.Label(ventana_emergente, text="mode",font=("Arial",16,"bold"))
-    label3.place(x=30,y=210)
-   
-    #boton
-    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
-    boton_config.place(x=250,y=340)    
-
-    def seleccionar_opcion(event):
-        global transfer_mode
-        seleccion = cuadro_seleccion.get()
-        transfer_mode=seleccion
-
-    # Crear el cuadro de selección
-    opciones = ['Local', 'Cloud']
-    cuadro_seleccion = ttk.Combobox(ventana_emergente, values=opciones,font=("Arial",14,"bold"))
-    cuadro_seleccion.place(x=200,y=210)
-    cuadro_seleccion.bind("<<ComboboxSelected>>", seleccionar_opcion)
-
-    #cuadro de entrada
-    fromm = tk.StringVar() 
-
-    entrada= tk.Entry(ventana_emergente,textvar=fromm,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada.place(x=200,y=50)
-
-    to = tk.StringVar() 
-
-    entrada3= tk.Entry(ventana_emergente,textvar=to,width=20, relief="flat",font=("Arial",14,"bold"))
-    entrada3.place(x=200,y=130)
-
-def emergente_rename():
-    global rename_path,rename_name,configure_type
-    # Crear la ventana emergente
-    ventana_emergente = tk.Toplevel(ventana)
-
-    def enviar():
-        global rename_path,rename_name,configure_type
-        rename_path="Archivos"+entrada.get()
-        rename_name=entrada3.get()
-
+        
+def funcion_rename(rename_path,rename_name):
+        global configure_type
         if configure_type=="local":
 
             if os.path.exists(rename_path):
@@ -747,7 +490,7 @@ def emergente_rename():
                     if repetido==False:
                         ruta_carpeta_actual = os.path.abspath(rename_path)                    
                         ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual),rename_name)
-                        print("ruta_nueva_carpeta="+ruta_nueva_carpeta)
+                        
                         #print("ruta actual"+ruta_carpeta_actual+"**"+"ruta nueva carpeta"+ruta_nueva_carpeta)
                         os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)
                         messagebox.showinfo("Rename", "carpeta renombrada correctamente")
@@ -807,6 +550,331 @@ def emergente_rename():
             else:                
                 messagebox.showinfo("Rename", "Ruta incorrecta")
 
+def funcion_modify(modify_path,modify_body):
+        global configure_type
+        
+        if configure_type=="local":
+
+            if os.path.exists(modify_path):
+                with open(modify_path, "w") as archivo:
+                    archivo.write(modify_body)
+                messagebox.showinfo("Modify", "Cuerpo cambiado correctamente")
+            else:
+                messagebox.showinfo("Modify", "Error la ruta no existe")
+        else:
+            #codigo para la nube
+            dividido=modify_path.split("/")
+            file_name=dividido[len(dividido)-1]
+            ruta_total=modify_path.replace(file_name,"")
+            verificar=gd.busca_carpeta(ruta_total)
+
+            #verificamos si existen las carpetas de la ruta
+            if verificar!="error":
+                #verificamos si el nombre mandado en la ruta existe en el directorio
+                existe=gd.verificar_archivos_carpetas_repetidas(verificar,file_name)
+                if existe==True:
+                    #como existe tanto las carpetas como el nombre del archivo procedemos a modificar el archivo.
+                    id_file=gd.buscar_archivos_en_carpeta(verificar,file_name)
+                    gd.eliminar_archvivo_por_id(id_file)
+                    gd.crear_archivo_texto(file_name,modify_body,verificar)
+                    messagebox.showinfo("Modify", "Archivo modificado")
+                else:
+                   messagebox.showinfo("Modify", "EL nombre de la ruta es incorrecto") 
+            else:
+                messagebox.showinfo("Modify", "Error en la ruta")
+    
+def funcion_add(add_path,add_body):
+        global configure_type
+        if configure_type=="local":
+            if os.path.exists(add_path):
+                with open(add_path, "a") as archivo:
+                    add_body="\n"+add_body
+                    archivo.write(add_body)
+                messagebox.showinfo("Add", "Cuerpo agregado correctamente")
+            else:
+                messagebox.showinfo("Add", "Error la ruta no existe")
+        else:
+             #codigo para la nube
+            dividido=add_path.split("/")
+            file_name=dividido[len(dividido)-1]
+            ruta_total=add_path.replace(file_name,"")
+            verificar=gd.busca_carpeta(ruta_total)
+
+            #verificamos si existen las carpetas de la ruta
+            if verificar!="error":
+                #verificamos si el nombre mandado en la ruta existe en el directorio
+                existe=gd.verificar_archivos_carpetas_repetidas(verificar,file_name)
+                if existe==True:
+                    #como existe tanto las carpetas como el nombre del archivo procedemos a agregar el nuevo contenido al archivo.
+                    id_file=gd.buscar_archivos_en_carpeta(verificar,file_name)                    
+                    gd.agregar_contenido_txt(id_file,add_body,file_name)
+                    messagebox.showinfo("Add", "Contenido agregado")
+                else:
+                   messagebox.showinfo("Add", "EL nombre de la ruta es incorrecto") 
+            else:
+                messagebox.showinfo("Add", "Error en la ruta")
+
+#ventanas emergentes
+def emergente_configure():
+    global configure_type,configure_log,configure_read,configure_key
+    # Crear la ventana emergente
+    ventana_emergente = tk.Toplevel(ventana)
+    #funcion enviar
+    def enviar():
+        global configure_key
+        configure_key=entrada.get()
+        messagebox.showinfo("Configure", "Sistema configurado")
+        
+        
+    # Configurar propiedades de la ventana emergente
+    ventana_emergente.title("Configure")
+    ventana_emergente.geometry("500x400")
+    
+    # Contenido de la ventana emergente
+    label1 = tk.Label(ventana_emergente, text="Type",font=("Arial",16,"bold"))
+    label1.place(x=30,y=50)
+
+    label2 = tk.Label(ventana_emergente, text="Encrypt_log",font=("Arial",16,"bold"))
+    label2.place(x=30,y=130)
+
+    label3 = tk.Label(ventana_emergente, text="Encrypt_reada",font=("Arial",16,"bold"))
+    label3.place(x=30,y=210)
+
+    label4 = tk.Label(ventana_emergente, text="llave",font=("Arial",16,"bold"))
+    label4.place(x=30,y=290)
+    
+    #boton
+    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
+    boton_config.place(x=250,y=340)
+
+    def seleccionar_opcion(event):
+        global configure_type
+        seleccion = cuadro_seleccion.get()
+
+        configure_type=seleccion
+       
+        
+
+    # Crear el cuadro de selección
+    opciones = ['local', 'cloud']
+    cuadro_seleccion = ttk.Combobox(ventana_emergente, values=opciones,font=("Arial",14,"bold"))
+    cuadro_seleccion.place(x=200,y=50)
+    cuadro_seleccion.bind("<<ComboboxSelected>>", seleccionar_opcion)
+
+    def seleccionar_opcion2(event):
+        global configure_log
+        seleccion = cuadro_seleccion2.get()
+        configure_log=seleccion
+      
+        
+        
+    # Crear el cuadro de selección
+    opciones2 = ['True', 'False']
+    cuadro_seleccion2 = ttk.Combobox(ventana_emergente, values=opciones2,font=("Arial",14,"bold"))
+    cuadro_seleccion2.place(x=200,y=130)
+    cuadro_seleccion2.bind("<<ComboboxSelected>>", seleccionar_opcion2)
+
+    def seleccionar_opcion3(event):
+        global configure_read
+        seleccion = cuadro_seleccion3.get()
+        configure_read=seleccion
+        
+       
+        
+    # Crear el cuadro de selección
+    opciones3 = ['True', 'False']
+    cuadro_seleccion3 = ttk.Combobox(ventana_emergente, values=opciones3,font=("Arial",14,"bold"))
+    cuadro_seleccion3.place(x=200,y=210)
+    cuadro_seleccion3.bind("<<ComboboxSelected>>", seleccionar_opcion3)
+
+    #cuadro de entrada
+    llave = tk.StringVar() 
+
+    entrada= tk.Entry(ventana_emergente,textvar=llave,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada.place(x=200,y=290)
+   
+def emergente_create():
+   
+    # Crear la ventana emergente
+    ventana_emergente = tk.Toplevel(ventana)
+   
+    # Configurar propiedades de la ventana emergente
+    ventana_emergente.title("Create")
+    ventana_emergente.geometry("500x400")
+    
+    # Contenido de la ventana emergente
+    label1 = tk.Label(ventana_emergente, text="Name",font=("Arial",16,"bold"))
+    label1.place(x=30,y=50)
+
+    label2 = tk.Label(ventana_emergente, text="Body",font=("Arial",16,"bold"))
+    label2.place(x=30,y=130)
+
+    label3 = tk.Label(ventana_emergente, text="Path",font=("Arial",16,"bold"))
+    label3.place(x=30,y=210)    
+
+    #cuadro de entrada
+    name = tk.StringVar() 
+
+    entrada= tk.Entry(ventana_emergente,textvar=name,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada.place(x=200,y=50)
+
+    body = tk.StringVar() 
+
+    entrada2= tk.Entry(ventana_emergente,textvar=body,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada2.place(x=200,y=130)
+
+    path = tk.StringVar() 
+
+    entrada3= tk.Entry(ventana_emergente,textvar=path,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada3.place(x=200,y=210)
+    
+    #funcion enviar
+    def enviar():
+       
+        global create_name,create_body,create_path,configure_type
+        create_name=entrada.get()
+        create_body=entrada2.get()
+        create_path="Archivos"+entrada3.get()
+        funcion_create(create_name,create_body,create_path)
+
+    #boton
+    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar,font=("Arial",14,"bold"),background="#5DADE2")
+    boton_config.place(x=250,y=340)  
+
+def emergente_delete():
+    global delete_path,delete_name,configure_type
+    # Crear la ventana emergente
+    ventana_emergente = tk.Toplevel(ventana)
+    def enviar():
+        global delete_path,delete_name,configure_type
+        delete_name=entrada3.get()
+        delete_path="Archivos"+entrada.get()
+        funcion_delete(delete_path,delete_name)
+
+    # Configurar propiedades de la ventana emergente
+    ventana_emergente.title("delete")
+    ventana_emergente.geometry("500x400")
+    
+    # Contenido de la ventana emergente
+    label1 = tk.Label(ventana_emergente, text="path",font=("Arial",16,"bold"))
+    label1.place(x=30,y=50)
+
+    label2 = tk.Label(ventana_emergente, text="name",font=("Arial",16,"bold"))
+    label2.place(x=30,y=130)
+   
+    #boton
+    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
+    boton_config.place(x=250,y=340)    
+
+    #cuadro de entrada
+    name = tk.StringVar() 
+
+    entrada= tk.Entry(ventana_emergente,textvar=name,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada.place(x=200,y=50)
+
+    path = tk.StringVar() 
+
+    entrada3= tk.Entry(ventana_emergente,textvar=path,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada3.place(x=200,y=130)
+
+def emergente_copy():
+    # Crear la ventana emergente
+    ventana_emergente = tk.Toplevel(ventana)
+    #funcion enviar
+    def enviar():
+        global copy_from,copy_to,configure_type
+        copy_to="Archivos"+entrada3.get()
+        copy_from="Archivos"+entrada.get()
+        funcion_copy(copy_from,copy_to)
+
+    # Configurar propiedades de la ventana emergente
+    ventana_emergente.title("Copy")
+    ventana_emergente.geometry("500x400")
+    
+    # Contenido de la ventana emergente
+    label1 = tk.Label(ventana_emergente, text="from",font=("Arial",16,"bold"))
+    label1.place(x=30,y=50)
+
+    label2 = tk.Label(ventana_emergente, text="to",font=("Arial",16,"bold"))
+    label2.place(x=30,y=130)
+   
+    #boton
+    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
+    boton_config.place(x=250,y=340)    
+
+    #cuadro de entrada
+    fromm = tk.StringVar() 
+
+    entrada= tk.Entry(ventana_emergente,textvar=fromm,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada.place(x=200,y=50)
+
+    to = tk.StringVar() 
+
+    entrada3= tk.Entry(ventana_emergente,textvar=to,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada3.place(x=200,y=130)
+
+def emergente_transfer():
+    # Crear la ventana emergente
+    ventana_emergente = tk.Toplevel(ventana)
+    #funcion enviar
+    def enviar():
+        global transfer_from,transfer_to,transfer_mode
+        transfer_from="Archivos"+entrada.get()
+        transfer_to="Archivos"+entrada3.get()
+        funcion_transfer(transfer_from,transfer_to,transfer_mode)
+                 
+    # Configurar propiedades de la ventana emergente
+    ventana_emergente.title("Transfer")
+    ventana_emergente.geometry("500x400")
+    
+    # Contenido de la ventana emergente
+    label1 = tk.Label(ventana_emergente, text="from",font=("Arial",16,"bold"))
+    label1.place(x=30,y=50)
+
+    label2 = tk.Label(ventana_emergente, text="to",font=("Arial",16,"bold"))
+    label2.place(x=30,y=130)
+
+    label3 = tk.Label(ventana_emergente, text="mode",font=("Arial",16,"bold"))
+    label3.place(x=30,y=210)
+   
+    #boton
+    boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar, font=("Arial",14,"bold"),background="#5DADE2")
+    boton_config.place(x=250,y=340)    
+
+    def seleccionar_opcion(event):
+        global transfer_mode
+        seleccion = cuadro_seleccion.get()
+        transfer_mode=seleccion
+
+    # Crear el cuadro de selección
+    opciones = ['Local', 'Cloud']
+    cuadro_seleccion = ttk.Combobox(ventana_emergente, values=opciones,font=("Arial",14,"bold"))
+    cuadro_seleccion.place(x=200,y=210)
+    cuadro_seleccion.bind("<<ComboboxSelected>>", seleccionar_opcion)
+
+    #cuadro de entrada
+    fromm = tk.StringVar() 
+
+    entrada= tk.Entry(ventana_emergente,textvar=fromm,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada.place(x=200,y=50)
+
+    to = tk.StringVar() 
+
+    entrada3= tk.Entry(ventana_emergente,textvar=to,width=20, relief="flat",font=("Arial",14,"bold"))
+    entrada3.place(x=200,y=130)
+
+def emergente_rename():
+    global rename_path,rename_name,configure_type
+    # Crear la ventana emergente
+    ventana_emergente = tk.Toplevel(ventana)
+
+    def enviar():
+        global rename_path,rename_name,configure_type
+        rename_path="Archivos"+entrada.get()
+        rename_name=entrada3.get()
+        funcion_rename(rename_path,rename_name)
+        
+
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("Rename")
     ventana_emergente.geometry("500x400")
@@ -840,35 +908,7 @@ def emergente_modify():
         global modify_path,modify_body,configure_type
         modify_path="Archivos"+entrada.get()
         modify_body=entrada3.get()
-        if configure_type=="local":
-
-            if os.path.exists(modify_path):
-                with open(modify_path, "w") as archivo:
-                    archivo.write(modify_body)
-                messagebox.showinfo("Modify", "Cuerpo cambiado correctamente")
-            else:
-                messagebox.showinfo("Modify", "Error la ruta no existe")
-        else:
-            #codigo para la nube
-            dividido=modify_path.split("/")
-            file_name=dividido[len(dividido)-1]
-            ruta_total=modify_path.replace(file_name,"")
-            verificar=gd.busca_carpeta(ruta_total)
-
-            #verificamos si existen las carpetas de la ruta
-            if verificar!="error":
-                #verificamos si el nombre mandado en la ruta existe en el directorio
-                existe=gd.verificar_archivos_carpetas_repetidas(verificar,file_name)
-                if existe==True:
-                    #como existe tanto las carpetas como el nombre del archivo procedemos a modificar el archivo.
-                    id_file=gd.buscar_archivos_en_carpeta(verificar,file_name)
-                    gd.eliminar_archvivo_por_id(id_file)
-                    gd.crear_archivo_texto(file_name,modify_body,verificar)
-                    messagebox.showinfo("Modify", "Archivo modificado")
-                else:
-                   messagebox.showinfo("Modify", "EL nombre de la ruta es incorrecto") 
-            else:
-                messagebox.showinfo("Modify", "Error en la ruta")
+        funcion_modify(modify_path,modify_body)
     
     # Crear la ventana emergente
     ventana_emergente = tk.Toplevel(ventana)
@@ -906,35 +946,8 @@ def emergente_add():
         global add_path,add_body,configure_type
         add_path="Archivos"+entrada.get()
         add_body=entrada3.get()
-        if configure_type=="local":
-            if os.path.exists(add_path):
-                with open(add_path, "a") as archivo:
-                    add_body="\n"+add_body
-                    archivo.write(add_body)
-                messagebox.showinfo("Add", "Cuerpo agregado correctamente")
-            else:
-                messagebox.showinfo("Add", "Error la ruta no existe")
-        else:
-             #codigo para la nube
-            dividido=add_path.split("/")
-            file_name=dividido[len(dividido)-1]
-            ruta_total=add_path.replace(file_name,"")
-            verificar=gd.busca_carpeta(ruta_total)
-
-            #verificamos si existen las carpetas de la ruta
-            if verificar!="error":
-                #verificamos si el nombre mandado en la ruta existe en el directorio
-                existe=gd.verificar_archivos_carpetas_repetidas(verificar,file_name)
-                if existe==True:
-                    #como existe tanto las carpetas como el nombre del archivo procedemos a agregar el nuevo contenido al archivo.
-                    id_file=gd.buscar_archivos_en_carpeta(verificar,file_name)                    
-                    gd.agregar_contenido_txt(id_file,add_body,file_name)
-                    messagebox.showinfo("Add", "Contenido agregado")
-                else:
-                   messagebox.showinfo("Add", "EL nombre de la ruta es incorrecto") 
-            else:
-                messagebox.showinfo("Add", "Error en la ruta")
-            
+        funcion_add(add_path,add_body)
+        
 
 
     # Configurar propiedades de la ventana emergente
