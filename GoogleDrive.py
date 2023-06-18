@@ -98,10 +98,6 @@ def eliminar_archvivo_por_id(file_id):
     credenciales = login()
     credenciales.CreateFile({'id': file_id}).Delete()
 
-#COPIAR ARCHIVO 
-def copiar_archivo(id_archivo, id_carpeta_destino,id_origen):
-    credenciales = login()
- 
 #COPIAR CARPETA
 def copiar_carpeta(id_carpeta, id_carpeta_destino):
     credenciales = login()
@@ -191,9 +187,16 @@ def mover_archivo(id_archivo,id_folder):
 raiz=False
 def subir_back(folder_path, parent_id='1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo'):
     try:
-
+        repetido=False
+        arch_repetido=False
         credenciales = login()
         folder_name = os.path.basename(folder_path)
+        if folder_name!="Archivos":
+            #revisar si el nombre existe
+            repetido=verificar_archivos_carpetas_repetidas(parent_id,folder_name)
+        while repetido:
+            folder_name+="(c)"
+            repetido=verificar_archivos_carpetas_repetidas(parent_id,folder_name)
         folder_metadata = {'title': folder_name, 'mimeType': 'application/vnd.google-apps.folder'}
         if folder_name!="Archivos":
             if parent_id:
@@ -208,6 +211,13 @@ def subir_back(folder_path, parent_id='1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo'):
                 if folder_name!="Archivos":
                     file_metadata = {'title': file_name, 'parents': [{'id': folder['id'] }]}
                 else:
+                    #verificar si el nombre de los archivos existe.
+                    arch_repetido=verificar_archivos_carpetas_repetidas(parent_id,file_name)
+                    while arch_repetido:
+                        aux=file_name.replace(".txt","")
+                        aux+="(c)"+".txt"
+                        file_name=aux
+                        arch_repetido=verificar_archivos_carpetas_repetidas(parent_id,file_name)
                     file_metadata = {'title': file_name, 'parents': [{'id': '1dtR7fv-l9Bn-XWAwSuC--CO7VSaYxFyo' }]}
                 file = credenciales.CreateFile(file_metadata)
                 file.SetContentFile(file_path)
@@ -249,6 +259,56 @@ def verificar_archivos_carpetas_repetidas(folder_id,name):
         if name==file['title']:
             parametro=True        
     return parametro
+
+def agregar_contenido_txt(id_archivo,content,file_name):
+    credenciales=login()
+    archivo = credenciales.CreateFile({'id': id_archivo})
+    contenido=archivo.GetContentString()
+    contenido+='\n'+content
+    archivo.SetContentString(contenido)
+    archivo.Upload()  # Sube el archivo actualizado a Google Drive
+
+def decargar_backup(folder_id, output_path):
+    credenciales=login()
+    folder_query = f"'{folder_id}' in parents and trashed=false"
+    file_list = credenciales.ListFile({'q': folder_query}).GetList()
+    existe_carpeta=False
+    existe_archivo=False
+    for file in file_list:
+        if file['mimeType'] == 'application/vnd.google-apps.folder':
+            # Si es una subcarpeta, llama recursivamente a la función
+            carpet_name=file['title']
+            #verificar si existe la carpeta
+            existe_carpeta=listar_directorio_local(carpet_name)
+            while existe_carpeta:
+                carpet_name+="(c)"
+                existe_carpeta=listar_directorio_local(carpet_name)
+            subfolder_path = os.path.join(output_path, carpet_name)
+            os.makedirs(subfolder_path, exist_ok=True)
+            decargar_backup(file['id'], subfolder_path)
+        else:
+            # Si es un archivo, descárgalo
+            file_name=file['title']
+            #verificar si existe la carpeta
+            existe_archivo=listar_directorio_local(file_name)
+            while existe_archivo:
+                aux=file_name.replace(".txt","")
+                aux+="(c)"
+                aux+=".txt"                      
+                file_name=aux
+                existe_archivo=listar_directorio_local(file_name)
+            file.GetContentFile(os.path.join(output_path, file_name))
+
+def listar_directorio_local(parametro):
+    ruta = 'C:/Users/Paulo/Documents/Vacas Junio 2023/Lab archivos/Proyectos/Proyecto1/Archivos/'
+    lista_archivos = os.listdir(ruta)
+    # Iterar sobre los elementos de la lista
+    existe=False
+    for archivo in lista_archivos:
+        # Obtener la ruta completa del archivo o carpeta
+        if parametro==archivo:
+            existe=True
+    return existe
 
 def renombrar(file_id,new_name):
     credenciales=login()   

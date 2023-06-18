@@ -8,7 +8,7 @@ import GoogleDrive as gd
 import os,re
 #variables globales de los comandos
 # comando configure 
-configure_type="cloud"
+configure_type="local"
 configure_log=False
 configure_read=False
 configure_key=""
@@ -56,8 +56,69 @@ nueva_fuente = font.Font(size=16)
 area_consola.configure(font=nueva_fuente)
 area_consola.place(x=30,y=90)
 
+#Funciones de comandos Local/Cloud tanto para interfaz grafica como para consola.
 
+def funcion_create(create_name,create_body,create_path):
+            global configure_type
+            if configure_type=="local":
+            
+                if not os.path.exists(create_path):
+                    # Crear la carpeta si no existe
+                    os.makedirs(create_path)
+                    
+                archivo = open(create_path+create_name,'w')
+                archivo.write(create_body)
+                archivo.close
+                messagebox.showinfo("Create", "Archivo creado exitosamente")
+            elif configure_type=="cloud":
+            
+                dividido=create_path.split("/")
+                ruta_existe=False
+                existe=gd.busca_carpeta(create_path)
+                ruta_alternativa="Archivos/"
+                if existe=="no":
+                    print("la ruta no existe2")
+                elif existe=="error":
+                    id_actual=""
+                    for i in range(len(dividido)-1):
+                        if i==0:
+                            existe=gd.busca_carpeta("Archivos")
+                        else:
+                            existe=gd.busca_carpeta(ruta_alternativa+dividido[i]+'/')
+                        if existe=="error":
+                            gd.crear_carpeta(dividido[i],id_actual)
+                            ruta_alternativa+=dividido[i]+'/'
+                            id_actual=gd.busca_carpeta(ruta_alternativa)
+                            
+                        elif existe=="error" and i==0:                        
+                            gd.crear_carpeta(dividido[i],id_folder)
+                            ruta_alternativa+=dividido[i]+'/'
+                            id_actual=gd.busca_carpeta(ruta_alternativa)
+                            
+                        else:
+                            if i>0:
+                                ruta_alternativa+=dividido[i]+'/'
+                                id_actual=existe
+                            elif i==0:
+                                id_actual=existe
+                            
+                else:
+                    ruta_existe=True
 
+                if ruta_existe==True:
+                    gd.crear_archivo_texto(create_name,create_body,existe)
+                    messagebox.showinfo("Create", "Archivo creado exitosamente")
+                    
+                else:
+                    #crear carpeta y despues txt
+                    existe=gd.busca_carpeta(create_path)
+                    gd.crear_archivo_texto(create_name,create_body,existe)
+                    messagebox.showinfo("Create", "Archivo creado exitosamente")               
+
+def funcion_delete(delete_path,delete_name):
+    global configure_type
+
+       
 #ventanas emergentes
 def emergente_configure():
     global configure_type,configure_log,configure_read,configure_key
@@ -174,81 +235,23 @@ def emergente_create():
     
     #funcion enviar
     def enviar():
-        global configure_type
-        global create_name,create_body,create_path
-        if configure_type=="local":
-            
-            create_name=entrada.get()
-            create_body=entrada2.get()
-            create_path=entrada3.get()
+       
+        global create_name,create_body,create_path,configure_type
+        create_name=entrada.get()
+        create_body=entrada2.get()
+        create_path="Archivos"+entrada3.get()
+        funcion_create(create_name,create_body,create_path)
 
-            ruta_total="Archivos"+create_path
-            if not os.path.exists(ruta_total):
-                # Crear la carpeta si no existe
-                os.makedirs(ruta_total)
-                
-            archivo = open(ruta_total+create_name,'w')
-            archivo.write(create_body)
-            archivo.close
-            messagebox.showinfo("Create", "Archivo creado exitosamente")
-        elif configure_type=="cloud":
-            
-            create_name=entrada.get()
-            create_body=entrada2.get()
-            create_path="Archivos"+entrada3.get()
-            dividido=create_path.split("/")
-            ruta_existe=False
-            existe=gd.busca_carpeta(create_path)
-            ruta_alternativa="Archivos/"
-            if existe=="no":
-                print("la ruta no existe2")
-            elif existe=="error":
-                id_actual=""
-                for i in range(len(dividido)-1):
-                    if i==0:
-                        existe=gd.busca_carpeta("Archivos")
-                    else:
-                        existe=gd.busca_carpeta(ruta_alternativa+dividido[i]+'/')
-                    if existe=="error":
-                        gd.crear_carpeta(dividido[i],id_actual)
-                        ruta_alternativa+=dividido[i]+'/'
-                        id_actual=gd.busca_carpeta(ruta_alternativa)
-                        
-                    elif existe=="error" and i==0:                        
-                        gd.crear_carpeta(dividido[i],id_folder)
-                        ruta_alternativa+=dividido[i]+'/'
-                        id_actual=gd.busca_carpeta(ruta_alternativa)
-                        
-                    else:
-                        if i>0:
-                            ruta_alternativa+=dividido[i]+'/'
-                            id_actual=existe
-                        elif i==0:
-                            id_actual=existe
-                        
-            else:
-                ruta_existe=True
-
-            if ruta_existe==True:
-                gd.crear_archivo_texto(create_name,create_body,existe)
-                messagebox.showinfo("Create", "Archivo creado exitosamente")
-                
-            else:
-                #crear carpeta y despues txt
-                existe=gd.busca_carpeta(create_path)
-                gd.crear_archivo_texto(create_name,create_body,existe)
-                messagebox.showinfo("Create", "Archivo creado exitosamente")               
-            
     #boton
     boton_config = tk.Button(ventana_emergente,text="Enviar",cursor="hand2",command=enviar,font=("Arial",14,"bold"),background="#5DADE2")
     boton_config.place(x=250,y=340)  
 
 def emergente_delete():
-    global delete_path,delete_name
+    global delete_path,delete_name,configure_type
     # Crear la ventana emergente
     ventana_emergente = tk.Toplevel(ventana)
     def enviar():
-        global delete_path,delete_name
+        global delete_path,delete_name,configure_type
         if configure_type=="local":
             delete_name=entrada3.get()
             delete_path=entrada.get()
@@ -288,10 +291,6 @@ def emergente_delete():
                 gd.eliminar_carpeta_por_id(id)
                 messagebox.showinfo("Delete", "Carpeta eliminada correctamente.")
 
-
-            
-
-
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("delete")
     ventana_emergente.geometry("500x400")
@@ -323,7 +322,7 @@ def emergente_copy():
     ventana_emergente = tk.Toplevel(ventana)
     #funcion enviar
     def enviar():
-        global copy_from,copy_to
+        global copy_from,copy_to,configure_type
         ruta_respaldo = 'C:/Users/Paulo/Documents/Vacas Junio 2023/Lab archivos/Proyectos/Proyecto1/Respaldo/'
         es_archivo=False
         copy_from=entrada.get()
@@ -334,7 +333,6 @@ def emergente_copy():
             es_archivo=True
         if configure_type =="local":
             
-                
             copy_to="Archivos"+entrada3.get()
             
             if es_archivo==False:
@@ -541,8 +539,7 @@ def emergente_transfer():
                         messagebox.showinfo("Transer", "Se movio el archivo")
                 else:                    
                     messagebox.showinfo("Transer", "La ruta de origen no existe")
-
-                
+        
         else:
             if es_archivo==True:
                 dividido=transfer_from.split('/')
@@ -660,7 +657,7 @@ def emergente_transfer():
                     while condicion:                        
                         name_carpet+="(c)"
                         condicion=gd.verificar_archivos_carpetas_repetidas(id_destino,name_carpet)
-                    #renombrar el archivo si esta repetido 
+                    #renombrar la carpeta si esta repetido 
                     gd.renombrar(id_origen,name_carpet)                    
                 try:                        
                     #muevo el archivo
@@ -710,59 +707,106 @@ def emergente_transfer():
     entrada3.place(x=200,y=130)
 
 def emergente_rename():
-    global rename_path,rename_name
+    global rename_path,rename_name,configure_type
     # Crear la ventana emergente
     ventana_emergente = tk.Toplevel(ventana)
 
     def enviar():
-        global rename_path,rename_name
+        global rename_path,rename_name,configure_type
         rename_path="Archivos"+entrada.get()
         rename_name=entrada3.get()
-        if os.path.exists(rename_path):
-            es_archivo=False
-            repetido=False
+
+        if configure_type=="local":
+
+            if os.path.exists(rename_path):
+                es_archivo=False
+                repetido=False
+                resultados = re.findall(r'\b\w+\.txt\b', rename_path)  
+                for resultado in resultados:            
+                    es_archivo=True
+
+
+                if es_archivo==False:
+                    dividido=rename_path.split('/')
+                    parametro=dividido[len(dividido)-1]
+                    nueva=rename_path.replace(parametro,"")    
+                    contenido = os.listdir(nueva)                  
+                    for elemento in contenido:
+                        if elemento==rename_name:
+                            repetido=True
+                else:
+                    dividido=rename_path.split("/")
+                    parametro=dividido[len(dividido)-1]
+                    ruta=rename_path.replace(parametro,"")
+                    contenido = os.listdir(ruta)                  
+                    for elemento in contenido:
+                        if elemento==rename_name:
+                            repetido=True
+
+                if es_archivo==False:
+                    if repetido==False:
+                        ruta_carpeta_actual = os.path.abspath(rename_path)                    
+                        ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual),rename_name)
+                        print("ruta_nueva_carpeta="+ruta_nueva_carpeta)
+                        #print("ruta actual"+ruta_carpeta_actual+"**"+"ruta nueva carpeta"+ruta_nueva_carpeta)
+                        os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)
+                        messagebox.showinfo("Rename", "carpeta renombrada correctamente")
+                    else:
+                        messagebox.showinfo("Rename", "Error el nombre de la carpeta ya existe")
+                elif es_archivo==True:
+                    if repetido==False:
+                        ruta_carpeta_actual = os.path.abspath(rename_path)                    
+                        ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual),rename_name)
+                        os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)
+                        messagebox.showinfo("Rename", "archivo renombrado correctamente")
+                    else:
+                        messagebox.showinfo("Rename", "Error el nombre del archivo ya existe")
+            else:
+                messagebox.showinfo("Rename", "Ruta incorrecta")
+        #codigo para cloud
+        else:
+            #determinar si es archivo o carpeta
+            es_archivo=False            
+            file_name=""
+            carpet_name=""
+            ruta_total=""
             resultados = re.findall(r'\b\w+\.txt\b', rename_path)  
             for resultado in resultados:            
                 es_archivo=True
+            
+            #obtener nombre de la carpeta o del archivo
+            if es_archivo==True:
 
-
-            if es_archivo==False:
-                dividido=rename_path.split('/')
-                parametro=dividido[len(dividido)-1]
-                nueva=rename_path.replace(parametro,"")    
-                contenido = os.listdir(nueva)                  
-                for elemento in contenido:
-                    if elemento==rename_name:
-                        repetido=True
+                dividido=rename_path.split("/")
+                file_name=dividido[len(dividido)-1]                
+                ruta_total=rename_path.replace(file_name,"")
+                verificar=gd.busca_carpeta(ruta_total)
             else:
                 dividido=rename_path.split("/")
-                parametro=dividido[len(dividido)-1]
-                ruta=rename_path.replace(parametro,"")
-                contenido = os.listdir(ruta)                  
-                for elemento in contenido:
-                    if elemento==rename_name:
-                        repetido=True
+                carpet_name=dividido[len(dividido)-2]                
+                verificar=gd.busca_carpeta(rename_path)            
 
-            if es_archivo==False:
+             #verificar si la ruta existe
+            if verificar!="error":
+                #verificar si el nombre esta en uso tanto para archivos como para carpetas
+                repetido=gd.verificar_archivos_carpetas_repetidas(verificar,rename_name)
                 if repetido==False:
-                    ruta_carpeta_actual = os.path.abspath(rename_path)                    
-                    ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual),rename_name)
-                    print("ruta_nueva_carpeta="+ruta_nueva_carpeta)
-                    #print("ruta actual"+ruta_carpeta_actual+"**"+"ruta nueva carpeta"+ruta_nueva_carpeta)
-                    os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)
-                    messagebox.showinfo("Rename", "carpeta renombrada correctamente")
+                    #el nombre no esta repetido entonces procedemos a renombrar
+                    if es_archivo==True:
+                        #renombramos el archivo
+                        id_file=gd.buscar_archivos_en_carpeta(verificar,file_name)
+                        gd.renombrar(id_file,rename_name)
+                        messagebox.showinfo("Rename", "Archivo renombrado") 
+                    else:
+                        #renombramos la carpeta                        
+                        gd.renombrar(verificar,rename_name)
+                        messagebox.showinfo("Rename", "Carpeta renombrada") 
+                    
                 else:
-                    messagebox.showinfo("Rename", "Error el nombre de la carpeta ya existe")
-            elif es_archivo==True:
-                if repetido==False:
-                    ruta_carpeta_actual = os.path.abspath(rename_path)                    
-                    ruta_nueva_carpeta = os.path.join(os.path.dirname(ruta_carpeta_actual),rename_name)
-                    os.rename(ruta_carpeta_actual, ruta_nueva_carpeta)
-                    messagebox.showinfo("Rename", "archivo renombrado correctamente")
-                else:
-                    messagebox.showinfo("Rename", "Error el nombre del archivo ya existe")
-        else:
-            messagebox.showinfo("Rename", "Ruta incorrecta")
+                    messagebox.showinfo("Rename", "Error el nombre ya existe.")  
+            else:                
+                messagebox.showinfo("Rename", "Ruta incorrecta")
+
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("Rename")
     ventana_emergente.geometry("500x400")
@@ -790,19 +834,42 @@ def emergente_rename():
     entrada3.place(x=200,y=130)
 
 def emergente_modify():
-    global modify_path,modify_body
+    global modify_path,modify_body,configure_type
 
     def enviar():
-        global modify_path,modify_body
+        global modify_path,modify_body,configure_type
         modify_path="Archivos"+entrada.get()
         modify_body=entrada3.get()
-        if os.path.exists(modify_path):
-            with open(modify_path, "w") as archivo:
-                archivo.write(modify_body)
-            messagebox.showinfo("Modify", "Cuerpo cambiado correctamente")
-        else:
-            messagebox.showinfo("Modify", "Error la ruta no existe")
+        if configure_type=="local":
 
+            if os.path.exists(modify_path):
+                with open(modify_path, "w") as archivo:
+                    archivo.write(modify_body)
+                messagebox.showinfo("Modify", "Cuerpo cambiado correctamente")
+            else:
+                messagebox.showinfo("Modify", "Error la ruta no existe")
+        else:
+            #codigo para la nube
+            dividido=modify_path.split("/")
+            file_name=dividido[len(dividido)-1]
+            ruta_total=modify_path.replace(file_name,"")
+            verificar=gd.busca_carpeta(ruta_total)
+
+            #verificamos si existen las carpetas de la ruta
+            if verificar!="error":
+                #verificamos si el nombre mandado en la ruta existe en el directorio
+                existe=gd.verificar_archivos_carpetas_repetidas(verificar,file_name)
+                if existe==True:
+                    #como existe tanto las carpetas como el nombre del archivo procedemos a modificar el archivo.
+                    id_file=gd.buscar_archivos_en_carpeta(verificar,file_name)
+                    gd.eliminar_archvivo_por_id(id_file)
+                    gd.crear_archivo_texto(file_name,modify_body,verificar)
+                    messagebox.showinfo("Modify", "Archivo modificado")
+                else:
+                   messagebox.showinfo("Modify", "EL nombre de la ruta es incorrecto") 
+            else:
+                messagebox.showinfo("Modify", "Error en la ruta")
+    
     # Crear la ventana emergente
     ventana_emergente = tk.Toplevel(ventana)
     
@@ -836,16 +903,40 @@ def emergente_add():
     # Crear la ventana emergente
     ventana_emergente = tk.Toplevel(ventana)
     def enviar():
-        global add_path,add_body
+        global add_path,add_body,configure_type
         add_path="Archivos"+entrada.get()
         add_body=entrada3.get()
-        if os.path.exists(add_path):
-            with open(add_path, "a") as archivo:
-                add_body="\n"+add_body
-                archivo.write(add_body)
-            messagebox.showinfo("Add", "Cuerpo agregado correctamente")
+        if configure_type=="local":
+            if os.path.exists(add_path):
+                with open(add_path, "a") as archivo:
+                    add_body="\n"+add_body
+                    archivo.write(add_body)
+                messagebox.showinfo("Add", "Cuerpo agregado correctamente")
+            else:
+                messagebox.showinfo("Add", "Error la ruta no existe")
         else:
-            messagebox.showinfo("Add", "Error la ruta no existe")
+             #codigo para la nube
+            dividido=add_path.split("/")
+            file_name=dividido[len(dividido)-1]
+            ruta_total=add_path.replace(file_name,"")
+            verificar=gd.busca_carpeta(ruta_total)
+
+            #verificamos si existen las carpetas de la ruta
+            if verificar!="error":
+                #verificamos si el nombre mandado en la ruta existe en el directorio
+                existe=gd.verificar_archivos_carpetas_repetidas(verificar,file_name)
+                if existe==True:
+                    #como existe tanto las carpetas como el nombre del archivo procedemos a agregar el nuevo contenido al archivo.
+                    id_file=gd.buscar_archivos_en_carpeta(verificar,file_name)                    
+                    gd.agregar_contenido_txt(id_file,add_body,file_name)
+                    messagebox.showinfo("Add", "Contenido agregado")
+                else:
+                   messagebox.showinfo("Add", "EL nombre de la ruta es incorrecto") 
+            else:
+                messagebox.showinfo("Add", "Error en la ruta")
+            
+
+
     # Configurar propiedades de la ventana emergente
     ventana_emergente.title("Add")
     ventana_emergente.geometry("500x400")
@@ -897,17 +988,26 @@ def emergente_exec():
     entrada.place(x=200,y=50)
 
 def backup():
-    global id_folder
+    global id_folder,configure_type
     if configure_type=="local":
         #hacer backup a la nube
         try:
             ruta_carpeta = 'C:/Users/Paulo/Documents/Vacas Junio 2023/Lab archivos/Proyectos/Proyecto1/Archivos'
-            gd.subir_back(ruta_carpeta,id_folder)
-            messagebox.showinfo("Drive", "correcto")
+            try:
+                gd.subir_back(ruta_carpeta,id_folder)
+                messagebox.showinfo("Drive", "Backup subido correctamente.")
+            except:
+                messagebox.showinfo("Drive", "Error al subir el backup")
         except:
             messagebox.showinfo("Drive", "error")
     else:
-        print("haciendo back de nuve a local")
+        try:
+            ruta_carpeta = 'C:/Users/Paulo/Documents/Vacas Junio 2023/Lab archivos/Proyectos/Proyecto1/Archivos/'
+            gd.decargar_backup(id_folder,ruta_carpeta)
+            messagebox.showinfo("Drive", "Backup descargado correctamente.")
+        except:
+            messagebox.showinfo("Drive", "error")
+
 
 #botones
 boton_config = tk.Button(ventana,text="Configure",cursor="hand2",command=emergente_configure, font=("Arial",14,"bold"),background="#5DADE2")
