@@ -1,4 +1,6 @@
 import tkinter as tk
+from analizador import analizador
+from tkinter import messagebox as MessageBox
 from tkinter import font
 from tkinter import messagebox
 from tkinter import ttk
@@ -37,6 +39,8 @@ add_body=""
 #comando exec
 exec_path=""
 
+a = analizador()
+
 #ventana principal TKinter
 ventana = tk.Tk()
 ventana.title("Consola")
@@ -53,6 +57,8 @@ area_consola = tk.Text(ventana,width=55, height=22)
 nueva_fuente = font.Font(size=16)
 area_consola.configure(font=nueva_fuente)
 area_consola.place(x=30,y=90)
+
+
 
 
 
@@ -616,6 +622,11 @@ boton_sesion.place(x=800,y=380)
 boton_analizar = tk.Button(ventana,text="Analizar",cursor="hand2", font=("Arial",14,"bold"),background="#5DADE2")
 boton_analizar.place(x=600,y=635)
 
+boton_analizar.configure(command=lambda: Analizar_Codigo())
 
+def Analizar_Codigo():
+    editado = area_consola.get(1.0, tk.END)
+    a.analizar(editado)
+    MessageBox.showinfo('Resultados', '¡Los datos han sido analizados exitosamente!')
 
 ventana.mainloop()

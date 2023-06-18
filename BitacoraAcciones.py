@@ -24,16 +24,17 @@ def CrearArreglo(tabla):
 
 def escribirBitacora(modo,clave):
     contenido = ""
-    ClaveEncriptacion = convertir_a_hexadecimal(clave)
+    if clave != None:
+        ClaveEncriptacion = convertir_a_hexadecimal(clave)
 
-    if modo == "false":
+    if (modo == "false")  or (modo == "true" and clave == None):
         for i in ArregloBitacora:
             linea = i.fecha + " | " + i.hora + " | Tipo: " + i.tipo + " | " + i.des + "\n"
             contenido += linea
 
         HF = HorayFecha()
         HF1 = HF[1].split("/")
-        HF2 = HF1[2] + "/" + HF1[1] + "/" + HF[0] + "/"
+        HF2 = HF1[2] + "/" + HF1[1] + "/" + HF1[0] + "/"
 
         os.makedirs("/Users/admin/Downloads/Archivos/logs/" + HF2, exist_ok=True)
         f = open("/Users/admin/Downloads/Archivos/logs/" + HF2 + "log_archivos.txt", "a")
@@ -42,7 +43,7 @@ def escribirBitacora(modo,clave):
         ArregloBitacora.clear()
 
 
-    if modo == "true":
+    if modo == "true" and clave != None:
         for i in ArregloBitacora:
             linea = i.fecha + " | " + i.hora +" | Tipo: " + i.tipo + " | " + i.des + "\n"
             encriptado = encriptar_contraseña(linea,ClaveEncriptacion)
@@ -57,4 +58,5 @@ def escribirBitacora(modo,clave):
         f.write(contenido)
         f.close()
         ArregloBitacora.clear()
+
 

@@ -154,17 +154,32 @@ def local(tabla,modo,encriptado,bitacorae,llave):
                     if os.path.exists(ruta+i.get("to")+nombre_archivo):
 
                         try:
-                            nombre = nombre_archivo.split(".")
-                            with open(ruta+i.get("from"), "r") as archivo_origen:
-                                contenido = archivo_origen.read()
-                            with open(ruta+i.get("to+")+"/"+nombre[0]+str(index)+"."+nombre[1], "w") as archivo_destino:
-                                archivo_destino.write(contenido)
-                            os.remove(ruta + i.get("from"))
+                            if os.path.isfile(ruta+i.get("from")):
+                                nombre = nombre_archivo.split(".")
+                                with open(ruta+i.get("from"), "r") as archivo_origen:
+                                    contenido = archivo_origen.read()
+                                with open(ruta+i.get("to+")+"/"+nombre[0]+str(index)+"."+nombre[1], "w") as archivo_destino:
+                                    archivo_destino.write(contenido)
+                                os.remove(ruta + i.get("from"))
+                                index+=1
 
-                            HF2 = HorayFecha()
-                            ArregloParaBitacora.append(
-                                bitacora(HF2[1], HF2[0], "Salida",
-                                         "Comando: transfer | " + i.get("from") + " movido exitosamente a ruta: " + i.get("to")))
+                                HF2 = HorayFecha()
+                                ArregloParaBitacora.append(
+                                    bitacora(HF2[1], HF2[0], "Salida",
+                                             "Comando: transfer | " + i.get("from") + " movido exitosamente a ruta: " + i.get("to")))
+                            elif os.path.isdir(ruta+i.get("from")):
+                                if not os.path.exists(ruta+i.get("to")):
+                                    os.makedirs(ruta+i.get("to"))
+
+
+                                contenido_carpeta = os.listdir(ruta+i.get("from"))
+
+
+                                for item in contenido_carpeta:
+                                    ruta_item_origen = os.path.join(ruta+i.get("from"), item)
+                                    ruta_item_destino = os.path.join(ruta+i.get("to"), item)
+                                    shutil.move(ruta_item_origen, ruta_item_destino)
+
                         except:
                             HF = HorayFecha()
                             ArregloParaBitacora.append(bitacora(HF[1], HF[0], "ERROR",
@@ -199,16 +214,18 @@ def local(tabla,modo,encriptado,bitacorae,llave):
                     HF1 = HorayFecha()
                     ArregloParaBitacora.append(
                         bitacora(HF1[1], HF1[0], "Entrada",
-                                 "Comando: rename | Renombrando: " + i.get("path") + " como: " + i.get("to")))
+                                 "Comando: rename | Renombrando: " + i.get("path") + " como: " + i.get("name")))
 
-                    if os.path.exists(ruta + directorio_padre + i.get("name")):
+                    if os.path.exists(ruta + directorio_padre +"/"+ i.get("name")):
                         HF = HorayFecha()
                         ArregloParaBitacora.append(
                             bitacora(HF[1], HF[0], "ERROR",
                                      "Comando: rename | El archivo " + i.get("name") + " ya existe."))
                     else:
                         try:
-                            os.rename(ruta + i.get("path"), i.get("name"))
+                            carpeta = os.path.dirname(i.get("path"))
+                            nueva_ruta_archivo = os.path.join(carpeta, i.get("name"))
+                            os.rename(ruta + i.get("path"), ruta+nueva_ruta_archivo)
                             HF2 = HorayFecha()
                             ArregloParaBitacora.append(
                                 bitacora(HF2[1], HF2[0], "Salida",
@@ -328,128 +345,11 @@ def local(tabla,modo,encriptado,bitacorae,llave):
                     bitacora(HF[1], HF[0], "ERROR",
                              "Comando: exec | El archivo " + i.get("path") + " no pudo leerse."))
 
+
+    CrearArreglo(ArregloParaBitacora)
+    escribirBitacora(bitacorae, llave)
+    ArregloBitacora.clear()
+
 def nube(tabla,modo,encriptado,bitacorae,llave):
 
-    for i in tabla:
-        comando = i.get("comando")
-        ruta = "/Users/admin/Downloads/Archivos"
-
-        if comando == "create":
-            try:
-                #Aqui se escribe el código
-            except:
-
-
-        elif comando == "delete":
-
-            if i.get("path") and i.get("name") in i:
-
-                try:
-                    # Aqui se escribe el código si viene la ruta y el archivo
-
-                except OSError as error:
-                    print(error)
-            else:
-                try:
-                    # Aqui se escribe el código si solo viene la ruta
-
-                except OSError as error:
-                    print(error)
-                    print("No se eliminó la carpeta")
-
-        elif comando == "copy":
-            if #Aqui se escribe el if si se trata de un archivo :
-                try:
-                    # Aqui se escribe el código si se quiere copiar solo un archivo
-
-                except:
-
-            elif  #Aqui se escribe si la ruta se trata de una carpeta:
-                try:
-                    # Aqui se escribe el código si se quiere copiar la ruta completa (carpeta)
-
-                except FileExistsError:
-
-            else:
-
-        elif comando == "transfer":
-
-            if modo == i.get("mode"):
-                if #Aqui se escribe si el archivo existe:
-
-                    if #Aqui se escribe si el archivo existe en la ruta destino:
-
-                        try:
-                            #Aqui se escribe el codigo para cortar y renombrar
-
-                        except:
-
-                    else:
-                        try:
-                            # Aqui se escribe el archivo si el archivo no existe en la carpeta destino
-
-                        except:
-
-                else:
-            else:
-
-        elif comando == "rename":
-
-                if #Aqui va el if si el archivo existe:
-
-                    if #Aqui va el if si el archivo existe en la carpeta destino:
-                    else:
-                        try:
-                            #Aqui se escribe el codigo para renombrar el archivo o carpeta
-                        except:
-
-                else:
-
-        elif comando == "modify":
-
-            if #Aqui se escribe si el if existe:
-
-                try:
-                    #aqui se escribe el codigo para modificar el archivo
-
-                except:
-
-            else:
-
-        elif comando == "add":
-
-            if #Aqui se escribe si el archivo existe:
-
-                try:
-                    #Aqui se escribe el codigo para concatenar codigo
-
-                except:
-
-            else:
-
-        elif comando == "backup":
-            print("hola")
-
-        elif comando == "exec":
-            try:
-
-                if encriptado == "false":
-                    f = open(ruta + i.get("path"), "r")
-                    contenido = f.read()
-                    f.close()
-
-                    a = analizador()
-                    a.analizar(contenido)
-
-                elif encriptado == "true":
-                    f = open(ruta + i.get("path"), "r")
-                    contenido = f.read()
-                    f.close()
-
-                    contenidodes = desencriptar_contraseña(contenido, llave)
-                    a = analizador()
-                    a.analizar(contenidodes)
-
-                else:
-
-            except:
+    print(llave)
