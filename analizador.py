@@ -5,7 +5,7 @@ L = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 
          'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
          'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'Ñ', 'ñ','á','é','í','ó','ú', 'Á','É','Í','Ó','Ú','.',',','_']
 D = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-comandos = ["configure","create","delete","copy","transfer","rename","modify","add","backup"]
+comandos = ["configure","create","delete","copy","transfer","rename","modify","add","backup","exec"]
 parametros =["type","encrypt_log","encrypt_read","llave","name","body","path","from","to","mode"]
 
 class analizador:
